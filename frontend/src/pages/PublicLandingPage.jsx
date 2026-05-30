@@ -401,6 +401,10 @@ export function PublicLandingPage() {
     setForm((current) => ({ ...current, proofFile: file }));
   }
 
+  const selectedProofFileLabel = form.proofFile
+    ? `${form.proofFile.name} • ${Math.max(1, Math.round(form.proofFile.size / 1024))} KB`
+    : t("No file chosen");
+
   return (
     <div
       className="public-dashboard min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(13,148,136,0.14),_transparent_32%),radial-gradient(circle_at_top_right,_rgba(245,158,11,0.10),_transparent_26%),linear-gradient(180deg,_#fffdf8_0%,_#f8f4eb_100%)] text-slate-950 transition-colors duration-200"
@@ -830,7 +834,9 @@ export function PublicLandingPage() {
                       />
                       <label className={`flex cursor-pointer items-center gap-4 rounded-2xl border px-4 py-4 text-sm outline-none transition ${isDark ? "border-slate-700 hover:bg-slate-900" : "border-slate-300 hover:bg-slate-50"}`} htmlFor="planner-proof-file">
                         <span className="rounded-xl bg-teal-50 px-3 py-2 text-sm font-bold text-teal-700">{t("Choose File")}</span>
-                        <span className={isDark ? "text-slate-300" : "text-slate-600"}>{form.proofFile?.name || t("No file chosen")}</span>
+                        <span className={isDark ? "text-slate-300" : "text-slate-600"} aria-live="polite">
+                          {selectedProofFileLabel}
+                        </span>
                       </label>
                       <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                         {t("Upload an image, PDF, DOC, or DOCX file up to 5 MB.")}
