@@ -1,0 +1,56 @@
+◇ injected env (23) from .env // tip: ⌘ suppress logs { quiet: true }
+◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+AI worker started (10s interval)
+info: Auto‑close worker started (cron every minute) {"timestamp":"2026-05-29T22:53:12.286Z"}
+info: Auto‑activation worker started (cron every minute) {"timestamp":"2026-05-29T22:53:12.293Z"}
+Emerging topics worker started (every 6 hours)
+info: Auto retry worker started (every 6 hours) {"timestamp":"2026-05-29T22:53:12.303Z"}
+info: Unverified user cleanup worker started (daily at 2 AM) {"timestamp":"2026-05-29T22:53:12.308Z"}
+info: Expire invitations worker started (runs every hour) {"timestamp":"2026-05-29T22:53:12.312Z"}
+info: Remind expiring invitations worker started (daily at 08:00) {"timestamp":"2026-05-29T22:53:12.316Z"}
+Server running on port 5000
+info: Redis connected {"timestamp":"2026-05-29T22:53:12.328Z"}
+MongoDB connected
+(node:858286) [MONGOOSE] Warning: mongoose: Duplicate schema index on {"parentCommentId":1} for model "Comment". This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858286) [MONGOOSE] Warning: mongoose: Duplicate schema index on {"visibility":1} for model "Comment". This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 1) {"timestamp":"2026-05-29T22:53:33.457Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:53:33.472Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 0) {"timestamp":"2026-05-29T22:53:33.474Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:53:33.476Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 0) {"timestamp":"2026-05-29T22:54:03.400Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:54:03.401Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 1) {"timestamp":"2026-05-29T22:54:03.408Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:54:03.409Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 0) {"timestamp":"2026-05-29T22:54:33.453Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:54:33.454Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 1) {"timestamp":"2026-05-29T22:54:33.457Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:54:33.458Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 0) {"timestamp":"2026-05-29T22:55:03.458Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:55:03.459Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 1) {"timestamp":"2026-05-29T22:55:03.460Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:55:03.461Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 0) {"timestamp":"2026-05-29T22:55:33.426Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:55:33.428Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 1) {"timestamp":"2026-05-29T22:55:33.429Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:55:33.430Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 1) {"timestamp":"2026-05-29T22:56:03.420Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:56:03.422Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 0) {"timestamp":"2026-05-29T22:56:03.424Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:56:03.426Z"}
+{ message: 'Invalid image file', name: 'Error', http_code: 400 }
+info: [object Object] {"timestamp":"2026-05-29T22:56:18.250Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 1) {"timestamp":"2026-05-29T22:56:33.475Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:56:33.476Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 0) {"timestamp":"2026-05-29T22:56:33.477Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:56:33.478Z"}
+{ message: 'Invalid image file', name: 'Error', http_code: 400 }
+info: [object Object] {"timestamp":"2026-05-29T22:56:55.372Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 0) {"timestamp":"2026-05-29T22:57:03.409Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:57:03.410Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 1) {"timestamp":"2026-05-29T22:57:03.417Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:57:03.418Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 0) {"timestamp":"2026-05-29T22:57:33.392Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:57:33.393Z"}
+info: User 6a16c7c88f59191d9042aafb retrieved notifications (page 1, total 1) {"timestamp":"2026-05-29T22:57:33.405Z"}
+info: [object Object] {"timestamp":"2026-05-29T22:57:33.405Z"}
