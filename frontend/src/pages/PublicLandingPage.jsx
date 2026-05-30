@@ -336,6 +336,16 @@ export function PublicLandingPage() {
 
     setSubmitting(true);
     try {
+      // If reCAPTCHA v3 is available, execute and attach token
+      const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+      let captchaToken = null;
+      if (siteKey && window.grecaptcha && typeof window.grecaptcha.execute === "function") {
+        try {
+          captchaToken = await window.grecaptcha.execute(siteKey, { action: "planner_request" });
+        } catch (err) {
+          console.warn("grecaptcha execute failed", err);
+        }
+      }
       const formData = new FormData();
       formData.append("applicantType", "nonCitizen");
       formData.append("fullName", form.fullName.trim());
@@ -351,6 +361,7 @@ export function PublicLandingPage() {
       formData.append("organization", form.organization.trim());
       formData.append("reason", form.reason.trim());
       formData.append("proofFile", form.proofFile);
+      if (captchaToken) formData.append("captchaToken", captchaToken);
 
       await plannerApi.requestPlannerPublic(formData);
       setForm(initialForm);

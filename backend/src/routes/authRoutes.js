@@ -15,6 +15,7 @@ router.post("/verify-otp", limiters.otpVerify, authController.verifyOtp);
 router.post("/login", captchaMiddleware, limiters.auth, authController.login);
 router.post(
   "/forgot-password",
+  captchaMiddleware,
   limiters.passwordResetRequest,
   authController.forgotPassword,
 );

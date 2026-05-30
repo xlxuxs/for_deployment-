@@ -30,6 +30,8 @@ const upload = multer({
   },
 });
 
+const captchaMiddleware = require("../middleware/captcha");
+
 const optionalCitizenAuth = (req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   if (!token) return next();
@@ -42,6 +44,7 @@ router.post(
   optionalCitizenAuth,
   limiters.plannerRequest,
   upload.single("proofFile"),
+  captchaMiddleware,
   plannerController.requestPlanner,
 );
 

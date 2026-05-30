@@ -26,7 +26,18 @@ export function ForgotPasswordPage() {
     setSubmitting(true);
 
     try {
-      await authApi.forgotPassword(email);
+      // If reCAPTCHA v3 is available, execute and send token
+      const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+      let token = null;
+      if (siteKey && window.grecaptcha && typeof window.grecaptcha.execute === "function") {
+        try {
+          token = await window.grecaptcha.execute(siteKey, { action: "forgot_password" });
+        } catch (err) {
+          // fall through and attempt request without token
+          console.warn("grecaptcha execute failed", err);
+        }
+      }
+      await authApi.forgotPassword(email, token);
       setSuccess(true);
     } catch (err) {
       setError(err.message || "Failed to send password reset email. Please try again.");

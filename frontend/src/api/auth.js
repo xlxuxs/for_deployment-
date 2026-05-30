@@ -13,8 +13,10 @@ export const authApi = {
   verifyOtp(email, code) {
     return apiClient.post("/auth/verify-otp", { email, code });
   },
-  forgotPassword(email) {
-    return apiClient.post("/auth/forgot-password", { email });
+  forgotPassword(email, captchaToken) {
+    const payload = { email };
+    if (captchaToken) payload.captchaToken = captchaToken;
+    return apiClient.post("/auth/forgot-password", payload);
   },
   resetPassword(token, newPassword) {
     return apiClient.post("/auth/reset-password", { token, newPassword });
