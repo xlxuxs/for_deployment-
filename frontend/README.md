@@ -10,4 +10,4 @@ cp .env.example .env
 npm run dev
 ```
 
-The app expects the backend API at `http://localhost:5000/api` by default.
+The app uses `https://citizenvoice-backend.onrender.com/api` by default.

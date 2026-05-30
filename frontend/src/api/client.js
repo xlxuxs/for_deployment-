@@ -1,9 +1,11 @@
 import axios from "axios";
 import { clearStoredAuth, readStoredAuth } from "../lib/storage";
 
+const REMOTE_API_BASE_URL = "https://citizenvoice-backend.onrender.com/api";
+
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.PROD ? "/api" : "http://localhost:5000/api");
+  (import.meta.env.PROD ? REMOTE_API_BASE_URL : "http://localhost:5000/api");
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

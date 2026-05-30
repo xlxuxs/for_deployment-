@@ -27,17 +27,30 @@ const app = express();
 // Security headers
 app.use(helmet());
 
-// CORS – whitelist
-const allowedOrigins = process.env.CORS_ORIGINS
-  ? process.env.CORS_ORIGINS.split(",")
-  : ["http://localhost:3000", "http://localhost:5173", "http://localhost:5174"];
+function parseOrigins(value) {
+  return (value || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
+const allowedOrigins = Array.from(
+  new Set([
+    ...parseOrigins(process.env.CORS_ORIGINS),
+    ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL.trim()] : []),
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5174",
+  ]),
+);
+
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        callback(null, false);
       }
     },
     credentials: true,
