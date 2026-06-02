@@ -253,8 +253,6 @@ const CommentSchema = new mongoose.Schema(
 CommentSchema.index({ policyId: 1, createdAt: -1 });
 CommentSchema.index({ policyId: 1, aiStatus: 1 });
 CommentSchema.index({ policyId: 1, reportState: 1 });
-CommentSchema.index({ parentCommentId: 1 });
-CommentSchema.index({ visibility: 1 });
 CommentSchema.index({ "reports.status": 1 });
 CommentSchema.index({ "appeal.status": 1 });
 CommentSchema.index({ "reviewFlags.sentimentReviewNeeded": 1 });
