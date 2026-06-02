@@ -75,7 +75,8 @@ button:disabled {
 }
 
 .dashboard-shell[data-dashboard-theme="dark"] .bg-slate-50,
-.dashboard-shell[data-dashboard-theme="dark"] .bg-slate-50\/80 {
+.dashboard-shell[data-dashboard-theme="dark"] .bg-slate-50\/80,
+.dashboard-shell[data-dashboard-theme="dark"] .bg-slate-50\/70 {
   background-color: #111827;
 }
 
@@ -167,6 +168,11 @@ button:disabled {
 .dashboard-shell[data-dashboard-theme="dark"] .hover\:bg-slate-50:hover,
 .dashboard-shell[data-dashboard-theme="dark"] .hover\:bg-white:hover {
   background-color: #1e293b;
+}
+
+.dashboard-shell[data-dashboard-theme="dark"] input::placeholder,
+.dashboard-shell[data-dashboard-theme="dark"] textarea::placeholder {
+  color: #94a3b8;
 }
 
 .dashboard-shell[data-dashboard-theme="dark"] .hover\:bg-slate-100:hover {

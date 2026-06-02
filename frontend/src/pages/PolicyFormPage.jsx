@@ -664,7 +664,7 @@ export function PolicyFormPage({ mode }) {
             />
           </div>
 
-          <section className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+          <section className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h3 className="text-sm font-bold text-slate-900">
