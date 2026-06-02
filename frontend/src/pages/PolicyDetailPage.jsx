@@ -846,7 +846,10 @@ export function PolicyDetailPage() {
                     </div>
                   </div>
                   <div className="mb-3 rounded-lg bg-slate-50 p-3">
-                    <p className="text-sm text-slate-900">
+                    <p
+                      data-i18n-skip="true"
+                      className="text-sm text-slate-900"
+                    >
                       {translatedComments[comment._id] ||
                         getCommentText(comment) ||
                         "Comment unavailable"}

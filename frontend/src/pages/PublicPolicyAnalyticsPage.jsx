@@ -377,7 +377,10 @@ export function PublicPolicyAnalyticsPage() {
                 {comments.length ? (
                   comments.slice(0, 10).map((comment) => (
                     <article key={comment.id} className="rounded-xl bg-slate-50 p-4">
-                      <p className="text-sm leading-6 text-slate-700">
+                      <p
+                        data-i18n-skip="true"
+                        className="text-sm leading-6 text-slate-700"
+                      >
                         {translatedComments[comment.id] || getCommentText(comment)}
                       </p>
                       <div className="mt-3 flex flex-wrap items-center gap-3">

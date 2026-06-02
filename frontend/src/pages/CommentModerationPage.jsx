@@ -356,7 +356,10 @@ export function CommentModerationPage() {
         </div>
 
         <div className="mb-3 rounded-lg bg-slate-50 p-3">
-          <p className="text-sm text-slate-900">
+          <p
+            data-i18n-skip="true"
+            className="text-sm text-slate-900"
+          >
             {translatedComments[comment._id] || getCommentText(comment) || "Comment unavailable"}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -797,7 +800,10 @@ export function CommentModerationPage() {
               <p className="text-sm font-semibold text-slate-900">
                 Comment text:
               </p>
-              <p className="text-sm text-slate-900">
+              <p
+                data-i18n-skip="true"
+                className="text-sm text-slate-900"
+              >
                 {translatedComments[appealModal.comment._id] ||
                   getCommentText(appealModal.comment) ||
                   "Comment unavailable"}

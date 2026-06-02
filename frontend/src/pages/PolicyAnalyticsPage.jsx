@@ -1078,7 +1078,10 @@ export function PolicyAnalyticsPage() {
                               {formatDate(comment.createdAt)}
                             </span>
                           </div>
-                          <p className="mt-3 text-sm leading-6 text-slate-700">
+                          <p
+                            data-i18n-skip="true"
+                            className="mt-3 text-sm leading-6 text-slate-700"
+                          >
                             {translatedComments[comment.id] || comment.text}
                           </p>
                           <div className="mt-3 flex flex-wrap items-center gap-3">
