@@ -834,7 +834,11 @@ export function PublicLandingPage() {
                       />
                       <label className={`flex cursor-pointer items-center gap-4 rounded-2xl border px-4 py-4 text-sm outline-none transition ${isDark ? "border-slate-700 hover:bg-slate-900" : "border-slate-300 hover:bg-slate-50"}`} htmlFor="planner-proof-file">
                         <span className="rounded-xl bg-teal-50 px-3 py-2 text-sm font-bold text-teal-700">{t("Choose File")}</span>
-                        <span className={isDark ? "text-slate-300" : "text-slate-600"} aria-live="polite">
+                        <span
+                          data-i18n-skip="true"
+                          className={isDark ? "text-slate-300" : "text-slate-600"}
+                          aria-live="polite"
+                        >
                           {selectedProofFileLabel}
                         </span>
                       </label>
