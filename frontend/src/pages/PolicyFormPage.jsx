@@ -6,6 +6,8 @@ import {
   Rocket,
   Copy,
   Trash2,
+  Search,
+  ExternalLink,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -26,6 +28,7 @@ import {
   POLICY_TOPICS,
 } from "../constants/regions";
 import { getErrorMessage, toIsoFromDateInput } from "../lib/format";
+import { useDebounce } from "../hooks/useDebounce";
 
 const policySchema = z
   .object({
@@ -127,6 +130,10 @@ export function PolicyFormPage({ mode }) {
   const [aiSuggestions, setAiSuggestions] = useState([]);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
+  const [relatedQuery, setRelatedQuery] = useState("");
+  const [relatedPolicies, setRelatedPolicies] = useState([]);
+  const [relatedLoading, setRelatedLoading] = useState(false);
+  const [relatedError, setRelatedError] = useState("");
   const [policy, setPolicy] = useState(null);
   const {
     register,
@@ -143,6 +150,7 @@ export function PolicyFormPage({ mode }) {
   const topics = watch("topics") || [];
   const startDate = watch("startDate");
   const endDate = watch("endDate");
+  const debouncedRelatedQuery = useDebounce(relatedQuery, 350);
   const canEdit = !isEdit || policy?.status === "draft";
 
   useEffect(() => {
@@ -191,6 +199,48 @@ export function PolicyFormPage({ mode }) {
     };
   }, [id, isEdit, reset]);
 
+  useEffect(() => {
+    let active = true;
+
+    async function loadRelatedPolicies() {
+      const cleanedQuery = debouncedRelatedQuery.trim();
+      if (!cleanedQuery && topics.length === 0) {
+        if (active) {
+          setRelatedPolicies([]);
+          setRelatedError("");
+        }
+        return;
+      }
+
+      setRelatedLoading(true);
+      setRelatedError("");
+      try {
+        const result = await policyApi.searchRelated({
+          q: cleanedQuery || undefined,
+          topics: topics.length ? topics.join(",") : undefined,
+          excludeId: id,
+          limit: 8,
+        });
+        if (active) {
+          setRelatedPolicies(result.policies || []);
+        }
+      } catch (err) {
+        if (active) {
+          setRelatedError(getErrorMessage(err, "Failed to load related policies"));
+        }
+      } finally {
+        if (active) {
+          setRelatedLoading(false);
+        }
+      }
+    }
+
+    loadRelatedPolicies();
+    return () => {
+      active = false;
+    };
+  }, [debouncedRelatedQuery, topics, id]);
+
   const title = useMemo(
     () => (isEdit ? "Edit policy" : "Create policy"),
     [isEdit],
@@ -235,6 +285,10 @@ export function PolicyFormPage({ mode }) {
       setValue("topics", [...topics, topic], { shouldValidate: true });
     }
     setAiSuggestions(aiSuggestions.filter((t) => t !== topic));
+  };
+
+  const applyTopicToSearch = (topic) => {
+    setRelatedQuery(topic);
   };
 
   const submit = async (values) => {
@@ -609,6 +663,125 @@ export function PolicyFormPage({ mode }) {
               suggestions={POLICY_TOPICS}
             />
           </div>
+
+          <section className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">
+                  Related Policies Research
+                </h3>
+                <p className="mt-1 text-sm text-slate-600">
+                  Search active and closed policies by keyword or your selected topics before finalizing this draft.
+                </p>
+              </div>
+              {topics.length ? (
+                <div className="flex flex-wrap gap-2">
+                  {topics.map((topic) => (
+                    <button
+                      key={topic}
+                      type="button"
+                      onClick={() => applyTopicToSearch(topic)}
+                      className="rounded-full border border-teal-200 bg-white px-3 py-1 text-xs font-bold text-teal-700 hover:bg-teal-50"
+                    >
+                      {topic}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            <label className="relative mt-4 block">
+              <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                value={relatedQuery}
+                onChange={(event) => setRelatedQuery(event.target.value)}
+                placeholder="Search related policies by title, code, description, or topic"
+                className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100"
+              />
+            </label>
+
+            {relatedError ? (
+              <div className="mt-3 text-sm font-semibold text-rose-600">
+                {relatedError}
+              </div>
+            ) : null}
+
+            {relatedLoading ? (
+              <div className="mt-4 flex items-center gap-2 text-sm font-semibold text-slate-600">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading related policies...
+              </div>
+            ) : relatedPolicies.length ? (
+              <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                {relatedPolicies.map((relatedPolicy) => (
+                  <article
+                    key={relatedPolicy.id}
+                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                          {relatedPolicy.policyCode}
+                        </p>
+                        <h4 className="mt-1 text-base font-bold text-slate-950">
+                          {relatedPolicy.title}
+                        </h4>
+                      </div>
+                      <StatusBadge status={relatedPolicy.status} />
+                    </div>
+                    <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">
+                      {relatedPolicy.description}
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {(relatedPolicy.topics || []).map((topic) => (
+                        <span
+                          key={`${relatedPolicy.id}-${topic}`}
+                          className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700"
+                        >
+                          {topic}
+                        </span>
+                      ))}
+                    </div>
+                    <dl className="mt-4 grid grid-cols-2 gap-2 text-xs text-slate-500">
+                      <div>
+                        <dt className="font-semibold text-slate-700">Type</dt>
+                        <dd>{relatedPolicy.pollType}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-semibold text-slate-700">Relation</dt>
+                        <dd className="capitalize">{relatedPolicy.relation}</dd>
+                      </div>
+                      <div className="col-span-2">
+                        <dt className="font-semibold text-slate-700">Regions</dt>
+                        <dd>{(relatedPolicy.targetRegions || []).join(", ") || "None"}</dd>
+                      </div>
+                    </dl>
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                      <Link
+                        to={`/policies/${relatedPolicy.id}`}
+                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                      >
+                        View policy
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </Link>
+                      <Link
+                        to={`/policies/${relatedPolicy.id}/analytics`}
+                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                      >
+                        View analytics
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : debouncedRelatedQuery.trim() || topics.length ? (
+              <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-5 text-sm text-slate-500">
+                No active or closed related policies matched this search yet.
+              </div>
+            ) : null}
+          </section>
 
           {/* AI Topic Suggestions */}
           <div>

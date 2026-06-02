@@ -13,6 +13,12 @@ router.get(
   policyController.getCategorizedPolicies,
 );
 
+router.get(
+  "/related-search",
+  auth(["planner", "admin"]),
+  policyController.searchRelatedPolicies,
+);
+
 // ========== List all policies (basic) ==========
 router.get("/", auth(["citizen", "planner", "admin"]), policyController.getAll);
 

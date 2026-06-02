@@ -30,7 +30,7 @@ const plannerRequestSchema = new mongoose.Schema({
         return String(value || "")
           .trim()
           .split(/\s+/)
-          .filter(Boolean).length >= 10;
+          .filter(Boolean).length >= 5;
       },
       message: "Reason must be at least 10 words.",
     },

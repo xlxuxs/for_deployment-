@@ -1870,3 +1870,114 @@ exports.getCategorizedPolicies = async (req, res) => {
     );
   }
 };
+
+// ========== SEARCH RELATED POLICIES (active/closed, accessible to planner/admin) ==========
+exports.searchRelatedPolicies = async (req, res) => {
+  try {
+    const { role, id: userId } = req.user;
+    const {
+      q = "",
+      topics,
+      excludeId,
+      limit = 8,
+    } = req.query;
+
+    const normalizedLimit = Math.min(Math.max(Number(limit) || 8, 1), 20);
+    const statuses = ["active", "closed"];
+    const topicList = [
+      ...(Array.isArray(topics) ? topics : String(topics || "").split(",")),
+    ]
+      .map((item) => String(item || "").trim())
+      .filter(Boolean);
+    const query = String(q || "").trim();
+
+    const filter = {
+      status: { $in: statuses },
+    };
+
+    if (excludeId && mongoose.Types.ObjectId.isValid(excludeId)) {
+      filter._id = { $ne: new mongoose.Types.ObjectId(excludeId) };
+    }
+
+    if (topicList.length) {
+      filter.topics = { $in: topicList };
+    }
+
+    if (query) {
+      filter.$or = [
+        { title: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } },
+        { policyCode: { $regex: query, $options: "i" } },
+        { topics: { $elemMatch: { $regex: query, $options: "i" } } },
+      ];
+    }
+
+    const policies = await Policy.find(filter)
+      .select(
+        "title description policyCode status targetRegions startDate endDate pollType topics createdBy",
+      )
+      .sort({ endDate: -1, createdAt: -1 })
+      .limit(normalizedLimit)
+      .populate("createdBy", "email")
+      .lean();
+
+    let delegatedIds = new Set();
+    if (role === "planner" && policies.length) {
+      const delegated = await PolicyAssociate.find({
+        plannerId: userId,
+        policyId: { $in: policies.map((policy) => policy._id) },
+        invitationStatus: "accepted",
+        revokedAt: null,
+      })
+        .select("policyId")
+        .lean();
+      delegatedIds = new Set(delegated.map((item) => item.policyId.toString()));
+    }
+
+    const response = policies.map((policy) => {
+      const ownerId =
+        policy.createdBy && typeof policy.createdBy === "object"
+          ? policy.createdBy._id?.toString?.()
+          : policy.createdBy?.toString?.();
+      const isOwner = ownerId === userId.toString();
+      const isDelegated = delegatedIds.has(policy._id.toString());
+
+      return {
+        id: policy._id,
+        title: policy.title,
+        description: policy.description,
+        policyCode: policy.policyCode,
+        status: policy.status,
+        targetRegions: policy.targetRegions,
+        startDate: policy.startDate,
+        endDate: policy.endDate,
+        pollType: policy.pollType,
+        topics: policy.topics || [],
+        createdBy: policy.createdBy?.email || "Unknown",
+        relation:
+          role === "admin"
+            ? "accessible"
+            : isOwner
+              ? "owned"
+              : isDelegated
+                ? "delegated"
+                : "public",
+      };
+    });
+
+    return sendSuccess(
+      res,
+      { policies: response },
+      "Related policies retrieved",
+    );
+  } catch (err) {
+    logger.error({ error: err.message }, "Search related policies error");
+    return sendError(
+      res,
+      ErrorCodes.INTERNAL,
+      "Failed to retrieve related policies",
+      null,
+      500,
+    );
+  }
+};

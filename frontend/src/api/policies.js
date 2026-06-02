@@ -50,6 +50,9 @@ export const policyApi = {
   suggestTopics(text) {
     return apiClient.post("/policies/suggest-topics", { text });
   },
+  searchRelated(params = {}) {
+    return apiClient.get("/policies/related-search", { params });
+  },
   // In policyApi.js, add this method after the existing ones
   getCategorizedPolicies(params) {
     return apiClient.get("/policies/categorized", { params });
