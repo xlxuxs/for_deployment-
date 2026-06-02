@@ -169,6 +169,7 @@ const shared = {
   "Proof file must be 5 MB or smaller.": { am: "የማስረጃ ፋይሉ 5 ሜባ ወይም ከዚያ ያነሰ መሆን አለበት።", om: "Faayilli ragaa 5 MB ykn isaa gadi ta'uu qaba.", ti: "ፋይል መረጋገጺ 5 ሜባ ወይ ካብኡ ዝንእስ ክኸውን ኣለዎ።" },
   "Proof file must be an image, PDF, DOC, or DOCX file.": { am: "የማስረጃ ፋይሉ ምስል፣ PDF፣ DOC ወይም DOCX መሆን አለበት።", om: "Faayilli ragaa suuraa, PDF, DOC, ykn DOCX ta'uu qaba.", ti: "ፋይል መረጋገጺ ስእሊ፣ PDF፣ DOC ወይ DOCX ክኸውን ኣለዎ።" },
   "Preferred language": { am: "የሚመረጥ ቋንቋ", om: "Afaan filatamaa", ti: "ተመራጺ ቋንቋ" },
+  "Select preferred language": { am: "የሚመረጥ ቋንቋ ይምረጡ", om: "Afaan filatamaa filadhu", ti: "ተመራጺ ቋንቋ ምረጽ" },
   "Upload an image, PDF, DOC, or DOCX file up to 5 MB.": { am: "እስከ 5 ሜባ ድረስ ምስል፣ PDF፣ DOC ወይም DOCX ፋይል ይጫኑ።", om: "Suuraa, PDF, DOC, ykn DOCX hanga 5 MB olkaa'i.", ti: "ስእሊ፣ PDF፣ DOC ወይ DOCX ክሳብ 5 ሜባ ስቀል።" },
   "Send planner request": { am: "የእቅድ አውጪ ጥያቄ ላክ", om: "Gaaffii karoorfataa ergi", ti: "ሕቶ መደብ ኣውጻኢ ልኣኽ" },
   "Submitting...": { am: "በመላክ ላይ...", om: "Ergaa jira...", ti: "ይለኣኽ ኣሎ..." },

@@ -61,13 +61,13 @@ export function PlannersListPage() {
   // Create planner modal demographic states
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newEmail, setNewEmail] = useState("");
-  const [newRegion, setNewRegion] = useState("Addis Ababa");
-  const [newAgeRange, setNewAgeRange] = useState("25-34");
-  const [newGender, setNewGender] = useState("prefer-not-to-say");
-  const [newOccupation, setNewOccupation] = useState("government-employee");
-  const [newEducation, setNewEducation] = useState("bachelors");
-  const [newPreferredLanguage, setNewPreferredLanguage] = useState("en");
-  const [newLanguagesSpoken, setNewLanguagesSpoken] = useState(["en"]);
+  const [newRegion, setNewRegion] = useState("");
+  const [newAgeRange, setNewAgeRange] = useState("");
+  const [newGender, setNewGender] = useState("");
+  const [newOccupation, setNewOccupation] = useState("");
+  const [newEducation, setNewEducation] = useState("");
+  const [newPreferredLanguage, setNewPreferredLanguage] = useState("");
+  const [newLanguagesSpoken, setNewLanguagesSpoken] = useState([]);
   const [createSubmitting, setCreateSubmitting] = useState(false);
   const [createError, setCreateError] = useState("");
 
@@ -132,8 +132,8 @@ export function PlannersListPage() {
     e.preventDefault();
     setCreateError("");
 
-    if (!newEmail || !newRegion || !newAgeRange || !newGender || !newOccupation || !newEducation) {
-      setCreateError("Email, region, age range, gender, occupation, and education level are required.");
+    if (!newEmail || !newRegion || !newAgeRange || !newGender || !newOccupation || !newEducation || !newPreferredLanguage || !newLanguagesSpoken.length) {
+      setCreateError("Email, region, age range, gender, occupation, education level, preferred language, and spoken languages are required.");
       return;
     }
 
@@ -152,13 +152,13 @@ export function PlannersListPage() {
 
       // Reset form fields
       setNewEmail("");
-      setNewRegion("Addis Ababa");
-      setNewAgeRange("25-34");
-      setNewGender("prefer-not-to-say");
-      setNewOccupation("government-employee");
-      setNewEducation("bachelors");
-      setNewPreferredLanguage("en");
-      setNewLanguagesSpoken(["en"]);
+      setNewRegion("");
+      setNewAgeRange("");
+      setNewGender("");
+      setNewOccupation("");
+      setNewEducation("");
+      setNewPreferredLanguage("");
+      setNewLanguagesSpoken([]);
       setShowCreateModal(false);
       try {
         showToast(
@@ -395,6 +395,7 @@ export function PlannersListPage() {
                     onChange={(e) => setNewRegion(e.target.value)}
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100 text-sm"
                   >
+                    <option value="">Select region</option>
                     {ETHIOPIAN_REGIONS.map((r) => (
                       <option key={r} value={r}>
                         {r}
@@ -410,6 +411,7 @@ export function PlannersListPage() {
                     onChange={(e) => setNewAgeRange(e.target.value)}
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100 text-sm"
                   >
+                    <option value="">Select age range</option>
                     {AGE_RANGES.map((range) => (
                       <option key={range} value={range}>
                         {range}
@@ -425,6 +427,7 @@ export function PlannersListPage() {
                     onChange={(e) => setNewGender(e.target.value)}
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100 text-sm"
                   >
+                    <option value="">Select gender</option>
                     {GENDERS.map((g) => (
                       <option key={g.value} value={g.value}>
                         {g.label}
@@ -448,6 +451,7 @@ export function PlannersListPage() {
                     onChange={(e) => setNewOccupation(e.target.value)}
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100 text-sm"
                   >
+                    <option value="">Select occupation</option>
                     {OCCUPATIONS.map((occ) => (
                       <option key={occ.value} value={occ.value}>
                         {occ.label}
@@ -463,6 +467,7 @@ export function PlannersListPage() {
                     onChange={(e) => setNewEducation(e.target.value)}
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100 text-sm"
                   >
+                    <option value="">Select education level</option>
                     {EDUCATIONS.map((edu) => (
                       <option key={edu.value} value={edu.value}>
                         {edu.label}
@@ -486,6 +491,7 @@ export function PlannersListPage() {
                     onChange={(e) => setNewPreferredLanguage(e.target.value)}
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100 text-sm"
                   >
+                    <option value="">Select preferred language</option>
                     {LANG_OPTIONS.map((lang) => (
                       <option key={lang.value} value={lang.value}>
                         {lang.label}

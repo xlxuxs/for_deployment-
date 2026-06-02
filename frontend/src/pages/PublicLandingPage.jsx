@@ -28,12 +28,12 @@ const initialForm = {
   email: "",
   phone: "",
   region: "",
-  ageRange: "25-34",
-  gender: "prefer-not-to-say",
-  occupation: "government-employee",
-  education: "bachelors",
-  preferredLanguage: "en",
-  languagesSpoken: ["en"],
+  ageRange: "",
+  gender: "",
+  occupation: "",
+  education: "",
+  preferredLanguage: "",
+  languagesSpoken: [],
   organization: "",
   reason: "",
   proofFile: null,
@@ -784,7 +784,7 @@ export function PublicLandingPage() {
                           onChange={(event) => setForm((current) => ({ ...current, preferredLanguage: event.target.value }))}
                           className={`min-h-[220px] w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100 ${isDark ? "border-slate-700 bg-slate-900 text-white" : "border-slate-300 bg-white text-slate-950"}`}
                         >
-                          <option value="">{t("Preferred language")}</option>
+                          <option value="">{t("Select preferred language")}</option>
                           {LANGUAGE_OPTIONS.map((language) => (
                             <option key={language.value} value={language.value}>
                               {t(language.label)}
