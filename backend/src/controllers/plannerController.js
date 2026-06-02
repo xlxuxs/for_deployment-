@@ -232,6 +232,7 @@ exports.requestPlanner = async (req, res) => {
       organization: organization || "",
       reason,
       proofFile: uploadResult.secure_url,
+      proofFileName: req.file?.originalname || null,
     });
     await request.save();
     // Notify admins about the new planner request

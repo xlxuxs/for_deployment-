@@ -21,18 +21,18 @@ import { showToast } from "../lib/toast";
 
 function FieldPill({ label, value }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
-      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-slate-900">{value}</p>
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-950/70">
+      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">{value}</p>
     </div>
   );
 }
 
 function TimelineItem({ label, value }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-slate-900">{value}</p>
+    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-950/70">
+      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">{value}</p>
     </div>
   );
 }
@@ -46,7 +46,7 @@ function SearchBox({ value, onChange, placeholder }) {
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-900 outline-none transition focus:border-teal-600 focus:ring-4 focus:ring-teal-100"
+        className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-900 outline-none transition focus:border-teal-600 focus:ring-4 focus:ring-teal-100 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-teal-500/20"
       />
     </label>
   );
@@ -183,6 +183,26 @@ export function PlannerRequestsPage() {
     return request.region || request.userId?.region || t("No region");
   }
 
+  function getProofFileLabel(request) {
+    if (request.proofFileName) {
+      return request.proofFileName;
+    }
+
+    if (request.proofFile) {
+      try {
+        const url = new URL(request.proofFile);
+        const parts = url.pathname.split("/").filter(Boolean);
+        const lastPart = parts[parts.length - 1] || "";
+        return decodeURIComponent(lastPart.split("?")[0]) || t("Support file");
+      } catch {
+        const fallback = request.proofFile.split("/").pop()?.split("?")[0];
+        return fallback ? decodeURIComponent(fallback) : t("Support file");
+      }
+    }
+
+    return t("Support file");
+  }
+
   function matchesSearch(request, query, includeReviewer = false) {
     const normalizedQuery = query.trim().toLowerCase();
     if (!normalizedQuery) {
@@ -232,47 +252,47 @@ export function PlannerRequestsPage() {
       <ErrorAlert message={error} />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <div className="rounded-[1.75rem] border border-emerald-100 bg-[linear-gradient(135deg,#ecfdf5_0%,#ffffff_100%)] p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">{t("Pending planner requests")}</p>
+        <div className="rounded-[1.75rem] border border-emerald-100 bg-[linear-gradient(135deg,#ecfdf5_0%,#ffffff_100%)] p-5 shadow-sm dark:border-emerald-900/50 dark:bg-[linear-gradient(135deg,rgba(6,78,59,0.35)_0%,rgba(15,23,42,0.92)_100%)]">
+          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">{t("Pending planner requests")}</p>
           <div className="mt-3 flex items-end justify-between gap-3">
             <div>
-              <p className="text-3xl font-black text-slate-950">{requestCounts.pendingRequests}</p>
-              <p className="text-sm text-slate-500">{t("Submitted request")}</p>
+              <p className="text-3xl font-black text-slate-950 dark:text-white">{requestCounts.pendingRequests}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t("Submitted request")}</p>
             </div>
-            <ShieldCheck className="h-9 w-9 text-emerald-600" />
+            <ShieldCheck className="h-9 w-9 text-emerald-600 dark:text-emerald-300" />
           </div>
         </div>
 
-        <div className="rounded-[1.75rem] border border-amber-100 bg-[linear-gradient(135deg,#fffbeb_0%,#ffffff_100%)] p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">{t("Pending deactivation appeals")}</p>
+        <div className="rounded-[1.75rem] border border-amber-100 bg-[linear-gradient(135deg,#fffbeb_0%,#ffffff_100%)] p-5 shadow-sm dark:border-amber-900/50 dark:bg-[linear-gradient(135deg,rgba(92,34,13,0.38)_0%,rgba(15,23,42,0.92)_100%)]">
+          <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">{t("Pending deactivation appeals")}</p>
           <div className="mt-3 flex items-end justify-between gap-3">
             <div>
-              <p className="text-3xl font-black text-slate-950">{requestCounts.pendingAppeals}</p>
-              <p className="text-sm text-slate-500">{t("Pending appeal")}</p>
+              <p className="text-3xl font-black text-slate-950 dark:text-white">{requestCounts.pendingAppeals}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t("Pending appeal")}</p>
             </div>
-            <TimerReset className="h-9 w-9 text-amber-600" />
+            <TimerReset className="h-9 w-9 text-amber-600 dark:text-amber-300" />
           </div>
         </div>
 
-        <div className="rounded-[1.75rem] border border-sky-100 bg-[linear-gradient(135deg,#eff6ff_0%,#ffffff_100%)] p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">{t("Reviewed request history")}</p>
+        <div className="rounded-[1.75rem] border border-sky-100 bg-[linear-gradient(135deg,#eff6ff_0%,#ffffff_100%)] p-5 shadow-sm dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,rgba(8,47,73,0.38)_0%,rgba(15,23,42,0.92)_100%)]">
+          <p className="text-xs font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-300">{t("Reviewed request history")}</p>
           <div className="mt-3 flex items-end justify-between gap-3">
             <div>
-              <p className="text-3xl font-black text-slate-950">{requestCounts.reviewedRequests}</p>
-              <p className="text-sm text-slate-500">{t("Reviewed request")}</p>
+              <p className="text-3xl font-black text-slate-950 dark:text-white">{requestCounts.reviewedRequests}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t("Reviewed request")}</p>
             </div>
-            <RefreshCw className="h-9 w-9 text-sky-600" />
+            <RefreshCw className="h-9 w-9 text-sky-600 dark:text-sky-300" />
           </div>
         </div>
       </div>
 
-      <div className="mb-5 flex flex-wrap gap-2 border-b border-slate-200">
+      <div className="mb-5 flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800">
         <button
           onClick={() => setActiveTab("requests")}
           className={`rounded-t-2xl px-4 py-2.5 text-sm font-bold ${
             activeTab === "requests"
-              ? "border-b-2 border-teal-700 text-teal-700"
-              : "text-slate-500 hover:text-slate-700"
+              ? "border-b-2 border-teal-700 text-teal-700 dark:border-teal-400 dark:text-teal-300"
+              : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
           {t("Planner Requests")} ({requests.length})
@@ -281,8 +301,8 @@ export function PlannerRequestsPage() {
           onClick={() => setActiveTab("history")}
           className={`rounded-t-2xl px-4 py-2.5 text-sm font-bold ${
             activeTab === "history"
-              ? "border-b-2 border-teal-700 text-teal-700"
-              : "text-slate-500 hover:text-slate-700"
+              ? "border-b-2 border-teal-700 text-teal-700 dark:border-teal-400 dark:text-teal-300"
+              : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
           {t("Request History")} ({requestHistory.length})
@@ -291,8 +311,8 @@ export function PlannerRequestsPage() {
           onClick={() => setActiveTab("appeals")}
           className={`rounded-t-2xl px-4 py-2.5 text-sm font-bold ${
             activeTab === "appeals"
-              ? "border-b-2 border-teal-700 text-teal-700"
-              : "text-slate-500 hover:text-slate-700"
+              ? "border-b-2 border-teal-700 text-teal-700 dark:border-teal-400 dark:text-teal-300"
+              : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
           {t("Deactivation Appeals")} ({appeals.length})
@@ -301,9 +321,9 @@ export function PlannerRequestsPage() {
 
       {activeTab === "requests" ? (
         <div className="space-y-4">
-          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-sm font-bold text-slate-900">{t("Search pending requests")}</p>
-            <p className="mt-1 text-sm text-slate-500">{t("Search by applicant, email, region, or reason...")}</p>
+          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/70">
+            <p className="text-sm font-bold text-slate-900 dark:text-white">{t("Search pending requests")}</p>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t("Search by applicant, email, region, or reason...")}</p>
             <div className="mt-3">
               <SearchBox
                 value={requestSearch}
@@ -317,27 +337,27 @@ export function PlannerRequestsPage() {
             filteredRequests.length ? (
               <section className="space-y-4">
                 {filteredRequests.map((request) => (
-                  <article key={request._id} className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-                    <div className="border-b border-slate-100 bg-[linear-gradient(135deg,#f8fafc_0%,#ffffff_100%)] px-5 py-5">
+                  <article key={request._id} className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-950/70">
+                    <div className="border-b border-slate-100 bg-[linear-gradient(135deg,#f8fafc_0%,#ffffff_100%)] px-5 py-5 dark:border-slate-800 dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.95)_0%,rgba(2,6,23,0.98)_100%)]">
                       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="text-lg font-black text-slate-950">{getApplicantName(request)}</p>
-                            <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">{t("Pending")}</span>
+                            <p className="text-lg font-black text-slate-950 dark:text-white">{getApplicantName(request)}</p>
+                            <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">{t("Pending")}</span>
                           </div>
-                          <p className="mt-2 text-sm font-medium text-slate-600">{getApplicantEmail(request)}</p>
-                          <p className="mt-1 text-sm text-slate-500">{t(getRegion(request))}</p>
+                          <p className="mt-2 text-sm font-medium text-slate-600 dark:text-slate-300">{getApplicantEmail(request)}</p>
+                          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t(getRegion(request))}</p>
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2 xl:justify-end">
-                          <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600">
+                          <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
                             {t("Submitted")} {formatDate(request.createdAt)}
                           </span>
                           <button
                             type="button"
                             disabled={actionLoading === request._id}
                             onClick={() => approve(request)}
-                            className="inline-flex items-center gap-1 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+                            className="inline-flex items-center gap-1 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
                           >
                             <CheckCircle className="h-4 w-4" />
                             {t("Approve")}
@@ -346,7 +366,7 @@ export function PlannerRequestsPage() {
                             type="button"
                             disabled={actionLoading === request._id}
                             onClick={() => setRejecting(request)}
-                            className="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 disabled:opacity-50"
+                            className="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 disabled:opacity-50 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300 dark:hover:bg-rose-500/20"
                           >
                             <XCircle className="h-4 w-4" />
                             {t("Reject")}
@@ -357,9 +377,9 @@ export function PlannerRequestsPage() {
 
                     <div className="grid gap-5 px-5 py-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)]">
                       <div className="space-y-4">
-                        <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-4">
-                          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">{t("Request summary")}</p>
-                          <p className="mt-3 text-sm leading-7 text-slate-700">{request.reason}</p>
+                        <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/60">
+                          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t("Request summary")}</p>
+                          <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-200">{request.reason}</p>
                         </div>
 
                         {request.proofFile ? (
@@ -367,18 +387,21 @@ export function PlannerRequestsPage() {
                             href={request.proofFile}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                            className="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900"
                           >
-                            <FileText className="h-4 w-4 text-teal-700" />
-                            {t("Open support file")}
+                            <FileText className="h-4 w-4 text-teal-700 dark:text-teal-300" />
+                            <span className="max-w-[16rem] truncate">{getProofFileLabel(request)}</span>
+                            <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-teal-700 dark:bg-teal-500/10 dark:text-teal-300">
+                              {t("Open")}
+                            </span>
                             <ExternalLink className="h-4 w-4" />
                           </a>
                         ) : null}
                       </div>
 
                       <div className="space-y-4">
-                        <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
-                          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">{t("Demographics")}</p>
+                        <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/70">
+                          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t("Demographics")}</p>
                           <div className="mt-3 grid gap-3 sm:grid-cols-2">
                             <FieldPill label={t("Age range")} value={translateValue(request.ageRange)} />
                             <FieldPill label={t("Gender")} value={translateValue(request.gender)} />
@@ -389,8 +412,8 @@ export function PlannerRequestsPage() {
                           </div>
                         </div>
 
-                        <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
-                          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">{t("Applicant profile")}</p>
+                        <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/70">
+                          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t("Applicant profile")}</p>
                           <div className="mt-3 grid gap-3 sm:grid-cols-2">
                             <FieldPill label={t("Full name")} value={getApplicantName(request)} />
                             <FieldPill label={t("Email")} value={getApplicantEmail(request)} />
@@ -414,9 +437,9 @@ export function PlannerRequestsPage() {
 
       {activeTab === "history" ? (
         <div className="space-y-4">
-          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-sm font-bold text-slate-900">{t("Search request history")}</p>
-            <p className="mt-1 text-sm text-slate-500">{t("Search by applicant, email, reviewer, or region...")}</p>
+          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/70">
+            <p className="text-sm font-bold text-slate-900 dark:text-white">{t("Search request history")}</p>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t("Search by applicant, email, reviewer, or region...")}</p>
             <div className="mt-3">
               <SearchBox
                 value={historySearch}
@@ -433,22 +456,22 @@ export function PlannerRequestsPage() {
                   const isApproved = request.status === "approved";
 
                   return (
-                    <article key={request._id} className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-                      <div className="border-b border-slate-100 px-5 py-5">
+                    <article key={request._id} className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-950/70">
+                      <div className="border-b border-slate-100 px-5 py-5 dark:border-slate-800">
                         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                           <div>
                             <div className="flex flex-wrap items-center gap-2">
-                              <p className="text-lg font-black text-slate-950">{getApplicantName(request)}</p>
+                              <p className="text-lg font-black text-slate-950 dark:text-white">{getApplicantName(request)}</p>
                               <span
                                 className={`rounded-full px-2.5 py-1 text-xs font-bold ${
-                                  isApproved ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
+                                  isApproved ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"
                                 }`}
                               >
                                 {isApproved ? t("Approved") : t("Rejected")}
                               </span>
                             </div>
-                            <p className="mt-2 text-sm font-medium text-slate-600">{getApplicantEmail(request)}</p>
-                            <p className="mt-1 text-sm text-slate-500">{t(getRegion(request))}</p>
+                            <p className="mt-2 text-sm font-medium text-slate-600 dark:text-slate-300">{getApplicantEmail(request)}</p>
+                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t(getRegion(request))}</p>
                           </div>
 
                           <div className="grid gap-3 sm:grid-cols-3 xl:min-w-[360px]">
@@ -461,13 +484,13 @@ export function PlannerRequestsPage() {
 
                       <div className="grid gap-5 px-5 py-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)]">
                         <div className="space-y-4">
-                          <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-4">
-                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">{t("Request summary")}</p>
-                            <p className="mt-3 text-sm leading-7 text-slate-700">{request.reason}</p>
+                          <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/60">
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t("Request summary")}</p>
+                            <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-200">{request.reason}</p>
                           </div>
 
                           {request.rejectionReason ? (
-                            <div className="rounded-[1.5rem] border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-800">
+                            <div className="rounded-[1.5rem] border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-800 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-200">
                               <span className="font-bold">{t("Rejection reason:")}</span> {request.rejectionReason}
                             </div>
                           ) : null}
@@ -477,18 +500,21 @@ export function PlannerRequestsPage() {
                               href={request.proofFile}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                              className="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900"
                             >
-                              <FileText className="h-4 w-4 text-teal-700" />
-                              {t("Open support file")}
+                              <FileText className="h-4 w-4 text-teal-700 dark:text-teal-300" />
+                              <span className="max-w-[16rem] truncate">{getProofFileLabel(request)}</span>
+                              <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-teal-700 dark:bg-teal-500/10 dark:text-teal-300">
+                                {t("Open")}
+                              </span>
                               <ExternalLink className="h-4 w-4" />
                             </a>
                           ) : null}
                         </div>
 
                         <div className="space-y-4">
-                          <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
-                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">{t("Demographics")}</p>
+                          <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/70">
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t("Demographics")}</p>
                             <div className="mt-3 grid gap-3 sm:grid-cols-2">
                               <FieldPill label={t("Age range")} value={translateValue(request.ageRange)} />
                               <FieldPill label={t("Gender")} value={translateValue(request.gender)} />
@@ -499,8 +525,8 @@ export function PlannerRequestsPage() {
                             </div>
                           </div>
 
-                          <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
-                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">{t("Review timeline")}</p>
+                          <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/70">
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t("Review timeline")}</p>
                             <div className="mt-3 grid gap-3 sm:grid-cols-2">
                               <FieldPill label={t("Region")} value={t(getRegion(request))} />
                               <FieldPill label={t("Status")} value={isApproved ? t("Approved") : t("Rejected")} />
@@ -527,20 +553,20 @@ export function PlannerRequestsPage() {
         appeals.length ? (
           <section className="space-y-3">
             {appeals.map((appeal) => (
-              <article key={appeal._id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+              <article key={appeal._id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-950/70">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-base font-bold text-slate-950">
+                      <p className="text-base font-bold text-slate-950 dark:text-white">
                         {appeal.plannerId?.email || t("Unknown")}
                       </p>
-                      <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">{t("Pending appeal")}</span>
+                      <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">{t("Pending appeal")}</span>
                     </div>
-                    <p className="text-sm text-slate-600">{t(appeal.plannerId?.region || "No region")}</p>
-                    <p className="max-w-3xl text-sm leading-6 text-slate-700">{appeal.reason}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-300">{t(appeal.plannerId?.region || "No region")}</p>
+                    <p className="max-w-3xl text-sm leading-6 text-slate-700 dark:text-slate-200">{appeal.reason}</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600">
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
                       {t("Submitted")} {formatDate(appeal.createdAt)}
                     </span>
                     <button
@@ -550,7 +576,7 @@ export function PlannerRequestsPage() {
                         setResolvingAppeal(appeal);
                         setAppealDecision("approve");
                       }}
-                      className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+                      className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
                     >
                       <CheckCircle className="h-4 w-4" />
                       {t("Approve")}
@@ -562,7 +588,7 @@ export function PlannerRequestsPage() {
                         setResolvingAppeal(appeal);
                         setAppealDecision("reject");
                       }}
-                      className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 disabled:opacity-50"
+                      className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 disabled:opacity-50 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300 dark:hover:bg-rose-500/20"
                     >
                       <XCircle className="h-4 w-4" />
                       {t("Reject")}
@@ -580,20 +606,20 @@ export function PlannerRequestsPage() {
       {rejecting ? (
         <Modal title="Reject planner request" onClose={() => setRejecting(null)}>
           <div className="space-y-4">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-600 dark:text-slate-300">
               {t("Provide a reason for rejecting")} {rejecting.userId?.email || t("this applicant")}.
             </p>
             <textarea
               rows="4"
               value={reason}
               onChange={(event) => setReason(event.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100"
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-teal-500/20"
             />
             <div className="flex justify-end gap-2">
-              <button type="button" className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50" onClick={() => setRejecting(null)}>
+              <button type="button" className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900" onClick={() => setRejecting(null)}>
                 {t("Cancel")}
               </button>
-              <button type="button" disabled={Boolean(actionLoading)} className="rounded-lg bg-rose-700 px-4 py-2 text-sm font-bold text-white hover:bg-rose-800 disabled:opacity-50" onClick={reject}>
+              <button type="button" disabled={Boolean(actionLoading)} className="rounded-lg bg-rose-700 px-4 py-2 text-sm font-bold text-white hover:bg-rose-800 disabled:opacity-50 dark:bg-rose-600 dark:hover:bg-rose-500" onClick={reject}>
                 {t("Reject")}
               </button>
             </div>
@@ -604,7 +630,7 @@ export function PlannerRequestsPage() {
       {resolvingAppeal ? (
         <Modal title="Resolve planner appeal" onClose={() => setResolvingAppeal(null)}>
           <div className="space-y-4">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-600 dark:text-slate-300">
               {appealDecision === "approve"
                 ? `Approve this appeal and reactivate ${resolvingAppeal.plannerId?.email || "the planner"}?`
                 : `Reject the appeal from ${resolvingAppeal.plannerId?.email || "this planner"}?`}
@@ -614,10 +640,10 @@ export function PlannerRequestsPage() {
               value={reason}
               onChange={(event) => setReason(event.target.value)}
               placeholder={t("Admin note (optional)")}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100"
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-teal-500/20"
             />
             <div className="flex justify-end gap-2">
-              <button type="button" className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50" onClick={() => setResolvingAppeal(null)}>
+              <button type="button" className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900" onClick={() => setResolvingAppeal(null)}>
                 {t("Cancel")}
               </button>
               <button
@@ -625,8 +651,8 @@ export function PlannerRequestsPage() {
                 disabled={Boolean(actionLoading)}
                 className={`rounded-lg px-4 py-2 text-sm font-bold text-white ${
                   appealDecision === "approve"
-                    ? "bg-emerald-700 hover:bg-emerald-800"
-                    : "bg-rose-700 hover:bg-rose-800"
+                    ? "bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                    : "bg-rose-700 hover:bg-rose-800 dark:bg-rose-600 dark:hover:bg-rose-500"
                 } disabled:opacity-50`}
                 onClick={resolveAppeal}
               >

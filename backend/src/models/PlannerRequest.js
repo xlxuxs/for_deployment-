@@ -24,6 +24,7 @@ const plannerRequestSchema = new mongoose.Schema({
   organization: { type: String, default: "" },
   reason: { type: String, required: true, minlength: 50 },
   proofFile: { type: String, default: null },
+  proofFileName: { type: String, default: null },
   status: {
     type: String,
     enum: ["pending", "approved", "rejected"],
