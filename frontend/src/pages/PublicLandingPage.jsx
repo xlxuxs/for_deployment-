@@ -87,6 +87,13 @@ const navigationItems = [
   { label: "Download", href: "https://drive.google.com/file/d/1IoDB_fscGSJHmlS8jR05GFoxA8joJuh7/view?usp=drive_link" },
 ];
 
+function countWords(value) {
+  return String(value || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+}
+
 const THEME_KEY = "civic_ui_theme";
 
 function getInitialTheme() {
@@ -314,8 +321,8 @@ export function PublicLandingPage() {
       return;
     }
 
-    if (form.reason.trim().length < 50) {
-      setError(t("Reason must be at least 50 characters."));
+    if (countWords(form.reason) < 10) {
+      setError(t("Reason must be at least 10 words."));
       return;
     }
 

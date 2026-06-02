@@ -164,7 +164,7 @@ const shared = {
   "Please select at least one spoken language.": { am: "እባክዎ ቢያንስ አንድ የሚነገር ቋንቋ ይምረጡ።", om: "Yoo xiqqaate afaan tokko filadhu.", ti: "እባክኻ እንተወሓደ ሓደ ቋንቋ ምረጽ።" },
   "Please enter your organization.": { am: "እባክዎ ድርጅትዎን ያስገቡ።", om: "Dhaabbata kee galchi.", ti: "እባክኻ ድርጅትካ ኣእቱ።" },
   "Please enter your reason for requesting planner access.": { am: "እባክዎ የእቅድ አውጪ መዳረሻ ለምን እንደሚጠይቁ ያስገቡ።", om: "Maaliif hayyama karoorfataa gaafattu galchi.", ti: "እባክኻ ምኽንያት ሕቶ መእተዊ መደብ ኣውጻኢ ኣእቱ።" },
-  "Reason must be at least 50 characters.": { am: "ምክንያቱ ቢያንስ 50 ፊደላት ሊኖረው ይገባል።", om: "Sababni qubee 50 ol qabaachuu qaba.", ti: "ምኽንያት ቢያንስ 50 ፊደላት ክህልዎ ኣለዎ።" },
+  "Reason must be at least 10 words.": { am: "ምክንያቱ ቢያንስ 10 ቃላት ሊኖሩት ይገባል።", om: "Sababni jechoota 10 yoo xiqqaate qabaachuu qaba.", ti: "ምኽንያት ቢያንስ 10 ቃላት ክህልዎ ኣለዎ።" },
   "Please upload a supporting proof file.": { am: "እባክዎ የሚደግፍ የማስረጃ ፋይል ያስገቡ።", om: "Faayila ragaa deeggaraa olkaa'i.", ti: "እባክኻ ፋይል መረጋገጺ ደጋፊ ስቀል።" },
   "Proof file must be 5 MB or smaller.": { am: "የማስረጃ ፋይሉ 5 ሜባ ወይም ከዚያ ያነሰ መሆን አለበት።", om: "Faayilli ragaa 5 MB ykn isaa gadi ta'uu qaba.", ti: "ፋይል መረጋገጺ 5 ሜባ ወይ ካብኡ ዝንእስ ክኸውን ኣለዎ።" },
   "Proof file must be an image, PDF, DOC, or DOCX file.": { am: "የማስረጃ ፋይሉ ምስል፣ PDF፣ DOC ወይም DOCX መሆን አለበት።", om: "Faayilli ragaa suuraa, PDF, DOC, ykn DOCX ta'uu qaba.", ti: "ፋይል መረጋገጺ ስእሊ፣ PDF፣ DOC ወይ DOCX ክኸውን ኣለዎ።" },

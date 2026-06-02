@@ -91,6 +91,23 @@ function Button({ children, icon: Icon, variant = "secondary", ...props }) {
   );
 }
 
+function normalizeCategorizedPolicies(result) {
+  return {
+    my: (result.owned || []).map((policy) => ({
+      ...policy,
+      id: policy.id || policy._id,
+    })),
+    delegated: (result.delegated || []).map((policy) => ({
+      ...policy,
+      id: policy.id || policy._id,
+    })),
+    other: (result.other || []).map((policy) => ({
+      ...policy,
+      id: policy.id || policy._id,
+    })),
+  };
+}
+
 export function PoliciesPage() {
   const { role } = useAuth();
   const location = useLocation();
@@ -177,12 +194,10 @@ export function PoliciesPage() {
 
     try {
       const result = await policyApi.getCategorizedPolicies(params);
-      let dataArray = [];
-      if (tab === "my") dataArray = result.owned || [];
-      else if (tab === "delegated") dataArray = result.delegated || [];
-      else dataArray = result.other || [];
-      dataArray = dataArray.map((p) => ({ ...p, id: p.id || p._id }));
-      setDataPerTab((prev) => ({ ...prev, [tab]: dataArray }));
+      setDataPerTab((prev) => ({
+        ...prev,
+        ...normalizeCategorizedPolicies(result),
+      }));
     } catch (err) {
       if (tab === activeTab)
         setError(getErrorMessage(err, "Failed to load policies"));
@@ -209,12 +224,10 @@ export function PoliciesPage() {
 
     try {
       const result = await policyApi.getCategorizedPolicies(params);
-      let dataArray = [];
-      if (activeTab === "my") dataArray = result.owned || [];
-      else if (activeTab === "delegated") dataArray = result.delegated || [];
-      else dataArray = result.other || [];
-      dataArray = dataArray.map((p) => ({ ...p, id: p.id || p._id }));
-      setDataPerTab((prev) => ({ ...prev, [activeTab]: dataArray }));
+      setDataPerTab((prev) => ({
+        ...prev,
+        ...normalizeCategorizedPolicies(result),
+      }));
     } catch (err) {
       setError(getErrorMessage(err, "Failed to load policies"));
     } finally {

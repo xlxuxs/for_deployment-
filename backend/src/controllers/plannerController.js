@@ -65,6 +65,12 @@ const normalizeLanguageCode = (value) => {
   return map[normalized] || null;
 };
 
+const countWords = (value) =>
+  String(value || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+
 // ==================== CITIZEN REQUESTS TO BECOME PLANNER ====================
 exports.requestPlanner = async (req, res) => {
   try {
@@ -94,11 +100,11 @@ exports.requestPlanner = async (req, res) => {
       );
     }
 
-    if (!reason || reason.length < 50) {
+    if (!reason || countWords(reason) < 10) {
       return sendError(
         res,
         ErrorCodes.VALIDATION,
-        "Reason must be at least 50 characters.",
+        "Reason must be at least 10 words.",
         null,
         400,
       );

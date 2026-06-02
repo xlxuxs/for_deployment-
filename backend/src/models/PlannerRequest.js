@@ -22,7 +22,19 @@ const plannerRequestSchema = new mongoose.Schema({
   preferredLanguage: { type: String, default: "" },
   languagesSpoken: [{ type: String }],
   organization: { type: String, default: "" },
-  reason: { type: String, required: true, minlength: 50 },
+  reason: {
+    type: String,
+    required: true,
+    validate: {
+      validator(value) {
+        return String(value || "")
+          .trim()
+          .split(/\s+/)
+          .filter(Boolean).length >= 10;
+      },
+      message: "Reason must be at least 10 words.",
+    },
+  },
   proofFile: { type: String, default: null },
   proofFileName: { type: String, default: null },
   status: {
