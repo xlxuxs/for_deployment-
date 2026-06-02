@@ -29,14 +29,14 @@ const getTransporter = async ({ requireDelivery = false } = {}) => {
 
   if (!transporterPromise) {
     transporterPromise = (async () => {
-      const host = process.env.EMAIL_HOST;
-      const user = process.env.EMAIL_USER;
-      const pass = process.env.EMAIL_PASS;
-      const port = parseInt(process.env.EMAIL_PORT || "587", 10);
+      const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
+      const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+      const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+      const port = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT || "587", 10);
 
       if (!host || !user || !pass) {
         const reason =
-          "Missing SMTP credentials (EMAIL_HOST/EMAIL_USER/EMAIL_PASS)";
+          "Missing SMTP credentials (SMTP_HOST/SMTP_USER/SMTP_PASS or EMAIL_HOST/EMAIL_USER/EMAIL_PASS)";
         if (requireDelivery) {
           throw new Error(reason);
         }
