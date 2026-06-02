@@ -539,6 +539,13 @@ exports.forgotPassword = async (req, res) => {
       200,
     );
   } catch (err) {
+    console.error("Forgot password error:", {
+      message: err.message,
+      code: err.code,
+      response: err.response,
+      responseCode: err.responseCode,
+      stack: err.stack,
+    });
     logger.error(
       { error: err.message, stack: err.stack },
       "Forgot password error",

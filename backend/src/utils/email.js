@@ -127,7 +127,15 @@ const sendEmail = async (to, subject, text, html) => {
     logger.info(`Email sent to ${to} (${subject})`);
     return { delivered: true, mode: "smtp" };
   } catch (err) {
-    logger.error(`Failed to send email to ${to}: ${err.message}`);
+    logger.error({
+      message: `Failed to send email to ${to}`,
+      error: err.message,
+      code: err.code,
+      response: err.response,
+      responseCode: err.responseCode,
+      command: err.command,
+      stack: err.stack,
+    });
     if (requireDelivery) {
       throw err;
     }
