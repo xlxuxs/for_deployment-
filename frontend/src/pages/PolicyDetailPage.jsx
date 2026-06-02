@@ -397,13 +397,21 @@ export function PolicyDetailPage() {
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1
+              data-i18n-skip="true"
+              className="text-2xl font-bold text-slate-900"
+            >
               {displayPolicyTitle}
             </h1>
             <p className="mt-1 text-sm text-slate-500">
               <strong className="font-medium">{t("Policy Code:")}</strong> {policy.policyCode} • <strong className="font-medium">{t("Read-only view")}</strong>
             </p>
-            <p className="mt-2 text-sm text-slate-600">{displayPolicyDescription}</p>
+            <p
+              data-i18n-skip="true"
+              className="mt-2 text-sm text-slate-600"
+            >
+              {displayPolicyDescription}
+            </p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -443,7 +451,12 @@ export function PolicyDetailPage() {
       <div className="mt-4 grid gap-4 md:grid-cols-3">
         <div className="rounded-lg border bg-white p-5 md:col-span-2">
           <h3 className="text-lg font-bold mb-3">{t("Description")}</h3>
-          <p className="text-sm text-slate-700 mb-4">{displayPolicyDescription}</p>
+          <p
+            data-i18n-skip="true"
+            className="text-sm text-slate-700 mb-4"
+          >
+            {displayPolicyDescription}
+          </p>
 
           <h3 className="text-lg font-bold mb-3">{t("Details")}</h3>
           <dl className="grid gap-2 sm:grid-cols-2">

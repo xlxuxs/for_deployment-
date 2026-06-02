@@ -280,10 +280,18 @@ export function PublicPolicyAnalyticsPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-teal-700">
                 Vote analytics
               </p>
-              <h1 className="mt-2 text-3xl font-black tracking-tight">
+              <h1
+                data-i18n-skip="true"
+                className="mt-2 text-3xl font-black tracking-tight"
+              >
                 {displayTitle}
               </h1>
-              <p className="mt-2 text-sm text-slate-600">{displayDescription}</p>
+              <p
+                data-i18n-skip="true"
+                className="mt-2 text-sm text-slate-600"
+              >
+                {displayDescription}
+              </p>
               <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
                 {analytics.pollType}
               </p>
