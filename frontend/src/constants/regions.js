@@ -15,7 +15,7 @@ export const ETHIOPIAN_REGIONS = [
   "Tigray",
 ];
 
-export const POLICY_STATUSES = ["draft", "published", "active", "paused", "closed", "archived"];
+export const POLICY_STATUSES = ["draft", "scheduled", "active", "paused", "closed", "archived"];
 
 export const POLICY_TOPICS = [
   "Health",

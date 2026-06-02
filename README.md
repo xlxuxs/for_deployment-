@@ -33,7 +33,7 @@ A multi‑channel platform for Ethiopian citizens to provide feedback on governm
 ### For Planners & Admins (Web Dashboard)
 
 - Create, edit (draft), **publish**, **unpublish**, close, pause, resume policies
-- **Auto‑activation**: published policies become active on their start date
+- **Auto‑activation**: scheduled policies become active on their start date
 - **Auto‑closure**: active/paused policies close when end date passes
 - **In‑app notifications**: planners receive alerts when their policies are activated; **voters receive notifications** when a policy closes (with final results)
 - Unified heatmap endpoint – visualise voting patterns over time (global time series or geographic heatmap with region breakdown)
@@ -50,12 +50,12 @@ A multi‑channel platform for Ethiopian citizens to provide feedback on governm
 ### Policy Lifecycle
 
 - **`draft`** – editable, not visible to citizens
-- **`published`** – ready for auto‑activation, invisible to citizens, can be unpublished or deleted
+- **`scheduled`** – ready for auto‑activation, invisible to citizens, can be unscheduled or deleted
 - **`active`** – visible, voting open (subject to date range), can be paused or closed
 - **`paused`** – temporarily suspended, can be resumed or closed
 - **`closed`** – final, no voting, visible only for results
 
-Auto‑activation and auto‑close workers run every minute (using `node-cron`) to transition `published → active` on start date and `active/paused → closed` on end date. Planners receive in‑app notifications when their policies are activated; voters receive notifications when a policy closes (with final average rating and vote count).
+Auto‑activation and auto‑close workers run every minute (using `node-cron`) to transition `scheduled → active` on start date and `active/paused → closed` on end date. Planners receive in‑app notifications when their policies are activated; voters receive notifications when a policy closes (with final average rating and vote count).
 
 ### AI Service (Background)
 

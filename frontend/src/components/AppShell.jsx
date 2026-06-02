@@ -41,6 +41,7 @@ const plannerLinks = [
 
 const adminLinks = [
   { to: "/planners", label: "Planners", icon: Users },
+  { to: "/planner-requests", label: "Planner Requests", icon: FileText },
   { to: "/citizens", label: "Citizens", icon: UserRound },
   { to: "/comments/pending", label: "Pending Comments", icon: MessageSquare },
   { to: "/comment-moderators", label: "Comment Moderators", icon: Users },

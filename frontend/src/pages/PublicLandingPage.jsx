@@ -231,7 +231,7 @@ export function PublicLandingPage() {
       {
         label: "Closed policies",
         value: approximateCount(summary.closedPolicies, "10+"),
-        detail: "Policies with published outcomes",
+        detail: "Policies with scheduled outcomes",
         icon: Vote,
       },
       {

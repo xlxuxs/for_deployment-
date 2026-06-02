@@ -126,14 +126,14 @@ export function PoliciesPage() {
 
   const getStatusOptions = () => {
     if (activeTab === "my") {
-      return ["draft", "published", "active", "paused", "closed", "archived"];
+      return ["draft", "scheduled", "active", "paused", "closed", "archived"];
     }
     if (activeTab === "delegated") {
-      return ["draft", "published", "active", "paused", "closed"];
+      return ["draft", "scheduled", "active", "paused", "closed"];
     }
     if (activeTab === "other") {
       if (role === "admin") {
-        return ["draft", "published", "active", "paused", "closed", "archived"];
+        return ["draft", "scheduled", "active", "paused", "closed", "archived"];
       } else {
         return ["active", "paused", "closed"];
       }

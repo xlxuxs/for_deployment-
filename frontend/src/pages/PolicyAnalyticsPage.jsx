@@ -584,8 +584,8 @@ export function PolicyAnalyticsPage() {
           Analytics are not available for policies with status{" "}
           <strong>{policy?.status}</strong>.
           {policy?.status === "draft" &&
-            " Please publish the policy to make it active."}
-          {policy?.status === "published" &&
+            " Please schedule the policy to make it active."}
+          {policy?.status === "scheduled" &&
             " The policy will become active on its start date."}
         </div>
       ) : (

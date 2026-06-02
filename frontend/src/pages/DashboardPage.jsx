@@ -288,7 +288,7 @@ export function DashboardPage() {
   const policyMetrics = useMemo(() => {
     const draftCount = policies.filter(p => p.status === "draft").length;
     const activeCount = policies.filter(p => p.status === "active").length;
-    const publishedCount = policies.filter(p => p.status === "published").length;
+    const publishedCount = policies.filter(p => p.status === "scheduled").length;
     const closedCount = policies.filter(p => p.status === "closed").length;
     const uniqueRegions = new Set(
       policies.flatMap((policy) => policy.targetRegions || [])
@@ -492,9 +492,9 @@ export function DashboardPage() {
         ) : (
           <>
             <StatCard
-              label="Published"
+              label="Scheduled"
               value={policyMetrics.publishedCount}
-              subtext="Live & collecting feedback"
+              subtext="Ready for activation"
               icon={CheckCircle2}
               color="emerald"
             />

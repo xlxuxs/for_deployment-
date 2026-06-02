@@ -76,7 +76,7 @@ const pollTypes = [
   "rating",
   "rankedChoice",
 ];
-const statuses = ["draft", "published", "active", "paused", "closed", "archived"];
+const statuses = ["draft", "scheduled", "active", "paused", "closed", "archived"];
 
 const topicPool = [
   "Health",
@@ -439,7 +439,7 @@ const pickEligibleCitizens = (citizens, targetRegions) => {
 
 const votesPerStatus = {
   draft: 0,
-  published: 5,
+  scheduled: 5,
   active: 10,
   paused: 4,
   closed: 6,
@@ -463,6 +463,8 @@ const createVotes = async ({ citizens, policies }) => {
             const optionIds = (policy.pollOptions || []).map((opt) => opt.id);
             return shuffle(optionIds).slice(0, Math.min(policy.maxSelections || 1, optionIds.length));
           }
+      const statuses = ["draft", "scheduled", "active", "paused", "closed", "archived"];
+
           case "likert":
             return randomInt(1, 5);
           case "approval":

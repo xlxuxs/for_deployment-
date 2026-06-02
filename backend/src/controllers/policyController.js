@@ -561,7 +561,7 @@ exports.publish = async (req, res) => {
       return sendError(
         res,
         ErrorCodes.VALIDATION,
-        `Only draft policies can be published. Current status: ${policy.status}`,
+        `Only draft policies can be scheduled. Current status: ${policy.status}`,
         null,
         400,
       );
@@ -593,10 +593,10 @@ exports.publish = async (req, res) => {
       );
     }
 
-    let newStatus = "published";
-    let action = "PUBLISH_POLICY";
+    let newStatus = "scheduled";
+    let action = "SCHEDULE_POLICY";
     let message =
-      "Policy published. It will be automatically activated on its start date.";
+      "Policy scheduled. It will be automatically activated on its start date.";
 
     if (now >= start && now <= end) {
       newStatus = "active";
@@ -624,7 +624,7 @@ exports.publish = async (req, res) => {
     });
 
     logger.info(
-      `Policy ${policy._id} (${policy.policyCode}) published by ${req.user.id} → status ${newStatus}`,
+      `Policy ${policy._id} (${policy.policyCode}) scheduled by ${req.user.id} → status ${newStatus}`,
     );
 
     if (newStatus === "active") {
@@ -675,11 +675,11 @@ exports.unpublish = async (req, res) => {
       );
     }
 
-    if (policy.status !== "published") {
+    if (policy.status !== "scheduled") {
       return sendError(
         res,
         ErrorCodes.VALIDATION,
-        `Only published policies can be unpublished. Current status: ${policy.status}`,
+        `Only scheduled policies can be unscheduled. Current status: ${policy.status}`,
         null,
         400,
       );
@@ -703,7 +703,7 @@ exports.unpublish = async (req, res) => {
     await createAuditLog({
       userId: req.user.id,
       userRole: req.user.role,
-      action: "UNPUBLISH_POLICY",
+      action: "UNSCHEDULE_POLICY",
       targetType: "Policy",
       targetId: policy._id,
       details: { policyCode: policy.policyCode, title: policy.title },
@@ -711,7 +711,7 @@ exports.unpublish = async (req, res) => {
     });
 
     logger.info(
-      `Policy ${policy._id} (${policy.policyCode}) unpublished by ${req.user.id}`,
+      `Policy ${policy._id} (${policy.policyCode}) unscheduled by ${req.user.id}`,
     );
     return sendSuccess(
       res,
@@ -1185,11 +1185,11 @@ exports.delete = async (req, res) => {
       );
     }
 
-    if (policy.status !== "draft" && policy.status !== "published") {
+    if (policy.status !== "draft" && policy.status !== "scheduled") {
       return sendError(
         res,
         ErrorCodes.FORBIDDEN,
-        "Only draft or published policies can be deleted. For active or paused policies, use the close endpoint.",
+        "Only draft or scheduled policies can be deleted. For active or paused policies, use the close endpoint.",
         null,
         403,
       );
@@ -1388,6 +1388,7 @@ exports.clone = async (req, res) => {
       citizenAnalyticsVisibility: original.citizenAnalyticsVisibility,
       topics: original.topics,
     });
+
     await newPolicy.save();
 
     await createAuditLog({

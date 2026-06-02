@@ -522,18 +522,18 @@ export function PolicyDetailPage() {
         <TabPane tabId="info">
           <div className="rounded-lg border bg-white p-5 shadow-sm">
             <div className="flex flex-wrap gap-2 mb-4">
-              {policy.status === "published" && (
+              {policy.status === "scheduled" && (
                 <ActionButton
                   icon={RefreshCw}
                   onClick={() =>
                     runAction(
                       "unpublish",
                       () => policyApi.unpublish(id),
-                      "Unpublished.",
+                      "Unscheduled.",
                     )
                   }
                 >
-                  Unpublish
+                  Unschedule
                 </ActionButton>
               )}
               {policy.status === "active" && (
@@ -599,7 +599,7 @@ export function PolicyDetailPage() {
                   Restore
                 </ActionButton>
               )}
-              {["published"].includes(policy.status) && (
+              {["scheduled"].includes(policy.status) && (
                 <ActionButton
                   icon={Trash2}
                   variant="danger"
@@ -978,7 +978,7 @@ export function PolicyDetailPage() {
           <div className="rounded-lg border bg-white p-5">
             <div className="mb-4 flex justify-between">
               <h3 className="text-lg font-bold">Associates & Invitations</h3>
-              {["published", "active", "paused", "closed"].includes(
+              {["scheduled", "active", "paused", "closed"].includes(
                 policy.status,
               ) && (
                 <ActionButton

@@ -438,7 +438,7 @@ async function seed() {
       `Citizens: ${citizens.length} (2 per region, covering ${ALL_REGIONS.length} regions)`,
     );
     console.log(
-      `Policies: ${policies.length} (${activePolicies.length} active, ${closedPolicies.length} closed, 0 draft/published)`,
+      `Policies: ${policies.length} (${activePolicies.length} active, ${closedPolicies.length} closed, 0 draft/scheduled)`,
     );
     console.log(`Total votes: ${totalVotes}`);
     console.log(`  - App votes: ${totalVotes - totalSmsVotes}`);

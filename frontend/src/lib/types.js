@@ -1,6 +1,6 @@
 /**
  * @typedef {"planner" | "admin"} Role
- * @typedef {"draft" | "published" | "active" | "paused" | "closed"} PolicyStatus
+ * @typedef {"draft" | "scheduled" | "active" | "paused" | "closed" | "archived"} PolicyStatus
  *
  * @typedef {Object} Policy
  * @property {string} id

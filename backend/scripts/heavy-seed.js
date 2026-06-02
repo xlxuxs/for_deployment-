@@ -85,7 +85,7 @@ const pollTypes = [
 
 const statusDistribution = [
   { status: "draft", weight: 0.1 },
-  { status: "published", weight: 0.15 },
+  { status: "scheduled", weight: 0.15 },
   { status: "active", weight: 0.4 },
   { status: "paused", weight: 0.05 },
   { status: "closed", weight: 0.25 },
@@ -377,7 +377,7 @@ async function seed() {
       if (status === "draft") {
         startDate = new Date(now.getTime() + randomInt(1, 30) * 86400000);
         endDate = new Date(startDate.getTime() + randomInt(30, 180) * 86400000);
-      } else if (status === "published") {
+      } else if (status === "scheduled") {
         startDate = new Date(now.getTime() + randomInt(1, 60) * 86400000);
         endDate = new Date(startDate.getTime() + randomInt(30, 180) * 86400000);
       } else if (status === "active") {

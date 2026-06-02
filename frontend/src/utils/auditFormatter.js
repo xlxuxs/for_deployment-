@@ -8,7 +8,7 @@ export const formatAuditDetails = (event) => {
     case "PUBLISH_POLICY":
       return `Status changed from ${details.fromStatus} to ${details.toStatus}`;
     case "UNPUBLISH_POLICY":
-      return "Status changed from published to draft";
+      return "Status changed from scheduled to draft";
     case "UPDATE_POLICY":
       return formatUpdatePolicy(details);
     case "ARCHIVE_POLICY":

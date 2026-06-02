@@ -406,24 +406,24 @@ The admin cannot reset their own password through this endpoint – they must us
 
 ## 3. Policy Endpoints
 
-| Role    | View own draft/published? | View others' draft/published? | View others' active/paused/closed?      | Create / Update / Delete (own) | Publish / Unpublish (own) | Pause / Resume / Close / Extend (own)                 |
-| ------- | ------------------------- | ----------------------------- | --------------------------------------- | ------------------------------ | ------------------------- | ----------------------------------------------------- |
-| Citizen | No                        | No                            | Yes (`active` and `paused`, own region) | No                             | No                        | No                                                    |
-| Planner | Yes (all statuses)        | **No (404)**                  | Yes                                     | Yes (draft/published only)     | Yes (draft → published)   | Yes (published → active, active/paused → close, etc.) |
-| Admin   | Yes (all)                 | Yes (all)                     | Yes                                     | Yes (any policy)               | Yes (any policy)          | Yes (any policy)                                      |
+| Role    | View own draft/scheduled? | View others' draft/scheduled? | View others' active/paused/closed?      | Create / Update / Delete (own) | Schedule / Unschedule (own) | Pause / Resume / Close / Extend (own)                 |
+| ------- | ------------------------- | ----------------------------- | --------------------------------------- | ------------------------------ | --------------------------- | ----------------------------------------------------- |
+| Citizen | No                        | No                            | Yes (`active` and `paused`, own region) | No                             | No                          | No                                                    |
+| Planner | Yes (all statuses)        | **No (404)**                  | Yes                                     | Yes (draft/scheduled only)     | Yes (draft → scheduled)     | Yes (scheduled → active, active/paused → close, etc.) |
+| Admin   | Yes (all)                 | Yes (all)                     | Yes                                     | Yes (any policy)               | Yes (any policy)            | Yes (any policy)                                      |
 
 **Important visibility rules:**
 
 - **Citizens** can only see policies with status `active` or `paused` that target their region. Any other policy (different status, different region) returns **`404 Not Found`** when accessed directly – citizens are never told that such a policy exists.
-- **Planners** see their own policies (any status). For other planners' policies, only `active`, `paused`, and `closed` are visible; **draft** and **published** policies of others return **`404 Not Found`** on any endpoint.
+- **Planners** see their own policies (any status). For other planners' policies, only `active`, `paused`, and `closed` are visible; **draft** and **scheduled** policies of others return **`404 Not Found`** on any endpoint.
 - **Admins** can see all policies.
 
 **Notes on actions:**
 
-- Delete allowed only for `draft` or `published` policies. Update only for `draft` policies.
+- Delete allowed only for `draft` or `scheduled` policies. Update only for `draft` policies.
 - Extend works on `active` or `paused`. Pause works on `active`, Resume on `paused`. Close works on `active` or `paused`.
-- Publish moves a `draft` policy to `published` (or directly to `active` if startDate already passed).
-- Unpublish moves a `published` policy back to `draft`.
+- Schedule moves a `draft` policy to `scheduled` (or directly to `active` if startDate already passed).
+- Unschedule moves a `scheduled` policy back to `draft`.
 
 ### 3.1 List policies
 
@@ -433,10 +433,10 @@ Query parameters (all optional):
 
 | Parameter         | Type    | Default | Description                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ----------------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `status`          | string  | none    | Filter by `draft`, `published`, `active`, `paused`, `closed`, or `archived`. Citizens cannot see `draft`, `published`, `closed`, or `archived`; they see only `active` and `paused`.                                                                                                                                                                                                                         |
+| `status`          | string  | none    | Filter by `draft`, `scheduled`, `active`, `paused`, `closed`, or `archived`. Citizens cannot see `draft`, `scheduled`, `closed`, or `archived`; they see only `active` and `paused`.                                                                                                                                                                                                                         |
 | `includeArchived` | boolean | false   | **For planners and admins only.** If `true`, archived policies are included in the results (unless a specific `status` filter excludes them). Default `false` (archived policies hidden from normal lists).                                                                                                                                                                                                  |
 | `region`          | string  | none    | Filter by target region (planners/admins only).                                                                                                                                                                                                                                                                                                                                                              |
-| `owner`           | string  | none    | **Planners only.** Use `owner=me` to see only policies owned by the logged‑in planner (any status). Without this, planners see their own policies (all statuses) **plus** other planners' `active`, `paused`, and `closed` policies. **Other planners' draft and published policies are excluded** – they do not appear in the list.                                                                         |
+| `owner`           | string  | none    | **Planners only.** Use `owner=me` to see only policies owned by the logged‑in planner (any status). Without this, planners see their own policies (all statuses) **plus** other planners' `active`, `paused`, and `closed` policies. **Other planners' draft and scheduled policies are excluded** – they do not appear in the list.                                                                         |
 | `topic`           | string  | none    | Filter policies by a topic (e.g., `?topic=Agriculture`). Can be used multiple times (`?topic=Agriculture&topic=Health`) to return policies that match **any** of the given topics. Topics are stored in the policy's `topics` array (set during creation, optionally via AI suggestion). Works for all roles but respects visibility rules (e.g., citizens only see active/paused policies in their region). |
 | `page`            | integer | 1       | Page number (1‑based).                                                                                                                                                                                                                                                                                                                                                                                       |
 | `limit`           | integer | 20      | Items per page (max 100).                                                                                                                                                                                                                                                                                                                                                                                    |
@@ -635,7 +635,7 @@ Query parameters (all optional):
 | 403    | `FORBIDDEN`        | `"You do not have permission to edit this policy"`       |
 | 404    | `NOT_FOUND`        | `"Policy not found"` (or hidden due to visibility rules) |
 
-### 3.5 Publish policy (draft → published/active)
+### 3.5 Schedule policy (draft → scheduled/active)
 
 **`PATCH /policies/:id/publish`**
 
@@ -645,8 +645,8 @@ Query parameters (all optional):
 **Behaviour:**
 
 - If current date is within `startDate` and `endDate` → status becomes `active` immediately.
-- If current date is before `startDate` → status becomes `published` (auto‑activation will happen later).
-- If current date is after `endDate` → error (cannot publish ended policy).
+- If current date is before `startDate` → status becomes `scheduled` (auto‑activation will happen later).
+- If current date is after `endDate` → error (cannot schedule an ended policy).
 
 **Response (200 OK):**
 
@@ -663,17 +663,17 @@ Query parameters (all optional):
 
 | Status | Code               | Message                                                       |
 | ------ | ------------------ | ------------------------------------------------------------- |
-| 400    | `VALIDATION_ERROR` | `"Only draft policies can be published. Current status: ..."` |
+| 400    | `VALIDATION_ERROR` | `"Only draft policies can be scheduled. Current status: ..."` |
 | 400    | `VALIDATION_ERROR` | `"Cannot publish a policy that has already ended."`           |
 | 403    | `FORBIDDEN`        | `"You do not have permission to publish this policy"`         |
 | 404    | `NOT_FOUND`        | `"Policy not found"`                                          |
 
-### 3.6 Unpublish policy (published → draft)
+### 3.6 Unschedule policy (scheduled → draft)
 
 **`PATCH /policies/:id/unpublish`**
 
 **Roles:** policy owner (planner) or admin  
-**Condition:** Policy status must be `published`.
+**Condition:** Policy status must be `scheduled`.
 
 **Response (200 OK):**
 
@@ -681,7 +681,7 @@ Query parameters (all optional):
 {
   "status": "success",
   "data": { "id": "...", "status": "draft" },
-  "message": "Policy unpublished and moved back to draft.",
+  "message": "Policy unscheduled and moved back to draft.",
   "timestamp": "..."
 }
 ```
@@ -772,12 +772,12 @@ Query parameters (all optional):
 | 400    | `VALIDATION_ERROR` | `"New end date cannot be in the past"`                 |
 | 403    | `FORBIDDEN`        | `"Only active or paused policies can change end date"` |
 
-### 3.11 Delete policy (draft or published only)
+### 3.11 Delete policy (draft or scheduled only)
 
 **`DELETE /policies/:id`**
 
 **Roles:** policy owner (planner) or admin  
-**Condition:** Policy status must be `draft` or `published` (not `active`, `paused`, or `closed`).
+**Condition:** Policy status must be `draft` or `scheduled` (not `active`, `paused`, or `closed`).
 
 **Response (200 OK):**
 
@@ -864,7 +864,7 @@ Query parameters (all optional):
 
 - Changes policy `status` back to `draft`.
 - Clears `archivedAt`, `archivedBy`, `archivedByRole`.
-- The policy becomes editable again (draft) and must be re‑published and activated to accept votes.
+- The policy becomes editable again (draft) and must be re‑scheduled and activated to accept votes.
 
 **Response (200 OK):**
 
@@ -1475,7 +1475,7 @@ Returns all replies to a specific comment. Only returns replies with `visibility
 
 **Access rules for analytics endpoints (all endpoints under /analytics):**
 
-- For **draft** or **published** policies:
+- For **draft** or **scheduled** policies:
   - The **policy owner** (planner who created it) can access analytics (but will receive a 400 error with message "Policy is not active yet (no analytics available)").
   - Any **other planner** receives a 404 Not Found (the policy is hidden).
 

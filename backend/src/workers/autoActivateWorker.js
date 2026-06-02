@@ -9,7 +9,7 @@ const autoActivatePolicies = async () => {
   try {
     const now = new Date();
     const policiesToActivate = await Policy.find({
-      status: "published",
+      status: "scheduled",
       startDate: { $lte: now },
       endDate: { $gte: now },
     });

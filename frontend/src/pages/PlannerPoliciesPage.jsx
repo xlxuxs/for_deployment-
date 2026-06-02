@@ -240,14 +240,14 @@ export function PlannerPoliciesPage() {
                                 runAction(
                                   `publish-${policy.id}`,
                                   () => policyApi.publish(policy.id),
-                                  "Policy published.",
+                                  "Policy scheduled.",
                                 )
                               }
                             >
-                              Publish
+                              Schedule
                             </Button>
                           ) : null}
-                          {policy.status === "published" ? (
+                          {policy.status === "scheduled" ? (
                             <Button
                               disabled={busy}
                               icon={RefreshCw}
@@ -255,11 +255,11 @@ export function PlannerPoliciesPage() {
                                 runAction(
                                   `unpublish-${policy.id}`,
                                   () => policyApi.unpublish(policy.id),
-                                  "Policy unpublished.",
+                                  "Policy unscheduled.",
                                 )
                               }
                             >
-                              Unpublish
+                              Unschedule
                             </Button>
                           ) : null}
                           {policy.status === "active" ? (
@@ -317,7 +317,7 @@ export function PlannerPoliciesPage() {
                               </Button>
                             </>
                           ) : null}
-                          {["draft", "published"].includes(policy.status) ? (
+                          {['draft', 'scheduled'].includes(policy.status) ? (
                             <Button
                               disabled={busy}
                               icon={Trash2}
