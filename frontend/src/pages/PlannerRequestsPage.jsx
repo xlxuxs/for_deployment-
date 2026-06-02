@@ -244,7 +244,7 @@ export function PlannerRequestsPage() {
   };
 
   return (
-    <div>
+    <div className="planner-requests-page">
       <PageHeader
         title="Planner Requests"
         description="Review citizen requests for planner access and planner deactivation appeals."
@@ -252,7 +252,7 @@ export function PlannerRequestsPage() {
       <ErrorAlert message={error} />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <div className="rounded-[1.75rem] border border-emerald-100 bg-[linear-gradient(135deg,#ecfdf5_0%,#ffffff_100%)] p-5 shadow-sm dark:border-emerald-900/50 dark:bg-[linear-gradient(135deg,rgba(6,78,59,0.35)_0%,rgba(15,23,42,0.92)_100%)]">
+        <div className="planner-summary-card planner-summary-card--emerald rounded-[1.75rem] border border-emerald-100 bg-[linear-gradient(135deg,#ecfdf5_0%,#ffffff_100%)] p-5 shadow-sm dark:border-emerald-900/50 dark:bg-[linear-gradient(135deg,rgba(6,78,59,0.35)_0%,rgba(15,23,42,0.92)_100%)]">
           <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">{t("Pending planner requests")}</p>
           <div className="mt-3 flex items-end justify-between gap-3">
             <div>
@@ -263,7 +263,7 @@ export function PlannerRequestsPage() {
           </div>
         </div>
 
-        <div className="rounded-[1.75rem] border border-amber-100 bg-[linear-gradient(135deg,#fffbeb_0%,#ffffff_100%)] p-5 shadow-sm dark:border-amber-900/50 dark:bg-[linear-gradient(135deg,rgba(92,34,13,0.38)_0%,rgba(15,23,42,0.92)_100%)]">
+        <div className="planner-summary-card planner-summary-card--amber rounded-[1.75rem] border border-amber-100 bg-[linear-gradient(135deg,#fffbeb_0%,#ffffff_100%)] p-5 shadow-sm dark:border-amber-900/50 dark:bg-[linear-gradient(135deg,rgba(92,34,13,0.38)_0%,rgba(15,23,42,0.92)_100%)]">
           <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">{t("Pending deactivation appeals")}</p>
           <div className="mt-3 flex items-end justify-between gap-3">
             <div>
@@ -274,7 +274,7 @@ export function PlannerRequestsPage() {
           </div>
         </div>
 
-        <div className="rounded-[1.75rem] border border-sky-100 bg-[linear-gradient(135deg,#eff6ff_0%,#ffffff_100%)] p-5 shadow-sm dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,rgba(8,47,73,0.38)_0%,rgba(15,23,42,0.92)_100%)]">
+        <div className="planner-summary-card planner-summary-card--sky rounded-[1.75rem] border border-sky-100 bg-[linear-gradient(135deg,#eff6ff_0%,#ffffff_100%)] p-5 shadow-sm dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,rgba(8,47,73,0.38)_0%,rgba(15,23,42,0.92)_100%)]">
           <p className="text-xs font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-300">{t("Reviewed request history")}</p>
           <div className="mt-3 flex items-end justify-between gap-3">
             <div>
@@ -321,7 +321,7 @@ export function PlannerRequestsPage() {
 
       {activeTab === "requests" ? (
         <div className="space-y-4">
-          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/70">
+          <div className="planner-request-panel rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/70">
             <p className="text-sm font-bold text-slate-900 dark:text-white">{t("Search pending requests")}</p>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t("Search by applicant, email, region, or reason...")}</p>
             <div className="mt-3">
@@ -337,8 +337,8 @@ export function PlannerRequestsPage() {
             filteredRequests.length ? (
               <section className="space-y-4">
                 {filteredRequests.map((request) => (
-                  <article key={request._id} className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-950/70">
-                    <div className="border-b border-slate-100 bg-[linear-gradient(135deg,#f8fafc_0%,#ffffff_100%)] px-5 py-5 dark:border-slate-800 dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.95)_0%,rgba(2,6,23,0.98)_100%)]">
+                  <article key={request._id} className="planner-request-card overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-950/70">
+                    <div className="planner-request-header border-b border-slate-100 bg-[linear-gradient(135deg,#f8fafc_0%,#ffffff_100%)] px-5 py-5 dark:border-slate-800 dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.95)_0%,rgba(2,6,23,0.98)_100%)]">
                       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
@@ -377,7 +377,7 @@ export function PlannerRequestsPage() {
 
                     <div className="grid gap-5 px-5 py-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)]">
                       <div className="space-y-4">
-                        <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/60">
+                        <div className="planner-request-summary rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/60">
                           <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t("Request summary")}</p>
                           <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-200">{request.reason}</p>
                         </div>
@@ -400,7 +400,7 @@ export function PlannerRequestsPage() {
                       </div>
 
                       <div className="space-y-4">
-                        <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/70">
+                        <div className="planner-request-metric-panel rounded-[1.5rem] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/70">
                           <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t("Demographics")}</p>
                           <div className="mt-3 grid gap-3 sm:grid-cols-2">
                             <FieldPill label={t("Age range")} value={translateValue(request.ageRange)} />
@@ -412,7 +412,7 @@ export function PlannerRequestsPage() {
                           </div>
                         </div>
 
-                        <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/70">
+                        <div className="planner-request-metric-panel rounded-[1.5rem] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/70">
                           <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t("Applicant profile")}</p>
                           <div className="mt-3 grid gap-3 sm:grid-cols-2">
                             <FieldPill label={t("Full name")} value={getApplicantName(request)} />
@@ -437,7 +437,7 @@ export function PlannerRequestsPage() {
 
       {activeTab === "history" ? (
         <div className="space-y-4">
-          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/70">
+          <div className="planner-request-panel rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/70">
             <p className="text-sm font-bold text-slate-900 dark:text-white">{t("Search request history")}</p>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t("Search by applicant, email, reviewer, or region...")}</p>
             <div className="mt-3">
@@ -456,8 +456,8 @@ export function PlannerRequestsPage() {
                   const isApproved = request.status === "approved";
 
                   return (
-                    <article key={request._id} className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-950/70">
-                      <div className="border-b border-slate-100 px-5 py-5 dark:border-slate-800">
+                    <article key={request._id} className="planner-request-card overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-950/70">
+                      <div className="planner-request-header border-b border-slate-100 px-5 py-5 dark:border-slate-800">
                         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                           <div>
                             <div className="flex flex-wrap items-center gap-2">
@@ -484,7 +484,7 @@ export function PlannerRequestsPage() {
 
                       <div className="grid gap-5 px-5 py-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)]">
                         <div className="space-y-4">
-                          <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/60">
+                          <div className="planner-request-summary rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/60">
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t("Request summary")}</p>
                             <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-200">{request.reason}</p>
                           </div>
@@ -513,7 +513,7 @@ export function PlannerRequestsPage() {
                         </div>
 
                         <div className="space-y-4">
-                          <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/70">
+                          <div className="planner-request-metric-panel rounded-[1.5rem] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/70">
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t("Demographics")}</p>
                             <div className="mt-3 grid gap-3 sm:grid-cols-2">
                               <FieldPill label={t("Age range")} value={translateValue(request.ageRange)} />
@@ -525,7 +525,7 @@ export function PlannerRequestsPage() {
                             </div>
                           </div>
 
-                          <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/70">
+                          <div className="planner-request-metric-panel rounded-[1.5rem] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/70">
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t("Review timeline")}</p>
                             <div className="mt-3 grid gap-3 sm:grid-cols-2">
                               <FieldPill label={t("Region")} value={t(getRegion(request))} />
@@ -553,7 +553,7 @@ export function PlannerRequestsPage() {
         appeals.length ? (
           <section className="space-y-3">
             {appeals.map((appeal) => (
-              <article key={appeal._id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-950/70">
+              <article key={appeal._id} className="planner-appeal-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-950/70">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
