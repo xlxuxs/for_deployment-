@@ -4,8 +4,7 @@ const crypto = require("crypto");
 const client = require("../config/redis");
 const logger = require("../utils/logger");
 const { createAuditLog } = require("../utils/audit");
-const { sendOtpEmail } = require("../utils/email");
-const { sendMobilePasswordResetEmail } = require("../utils/mobileEmail");
+const { sendOtpEmail, sendPasswordResetEmail } = require("../utils/email");
 const {
   hashPassword,
   comparePassword,
@@ -521,7 +520,7 @@ exports.forgotPassword = async (req, res) => {
     await client.incr(rateKey);
     await client.expire(rateKey, 3600);
 
-    await sendMobilePasswordResetEmail(email, token);
+    await sendPasswordResetEmail(email, token);
     logger.info(`Password reset email sent to ${email}`);
 
     // Audit log for password reset request - ADDED BACK
