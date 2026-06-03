@@ -238,7 +238,7 @@ exports.editComment = async (req, res) => {
 
     // Find the latest version of this thread
     const threadId = comment.originalCommentId || comment._id;
-    const latestVersion = await getLatestVersion(threadId);
+    const latestVersion = (await getLatestVersion(threadId)) || comment;
 
     // If the latest version is pending and never analysed, replace it
     if (
