@@ -1087,6 +1087,30 @@ exports.exportAnalytics = async (req, res) => {
     if (region) voteFilter.region = region;
 
     const votes = await Vote.find(voteFilter).lean();
+    const voteSummary = await getPollTypeAggregation(policy, voteFilter);
+
+    const commentFilter = {
+      policyId: policy._id,
+      visibility: "visible",
+      aiStatus: "processed",
+      parentCommentId: null,
+      $or: [
+        { "reviewFlags.sentimentReviewNeeded": false },
+        { "sentiment.overriddenByModerator": true },
+      ],
+    };
+    if (start) commentFilter.createdAt = { $gte: start };
+    if (end) commentFilter.createdAt = { ...commentFilter.createdAt, $lte: end };
+    if (gender) commentFilter["demographics.gender"] = gender;
+    if (ageRange) commentFilter["demographics.ageRange"] = ageRange;
+    if (occupation) commentFilter["demographics.occupation"] = occupation;
+    if (education) commentFilter["demographics.education"] = education;
+    if (region) commentFilter.region = region;
+
+    const comments = await Comment.find(commentFilter)
+      .sort({ createdAt: -1 })
+      .populate("userId", "displayName email")
+      .lean();
 
     const escapeCsv = (value) => {
       if (value === null || value === undefined) return "";
@@ -1101,27 +1125,233 @@ exports.exportAnalytics = async (req, res) => {
       return stringValue;
     };
 
+    const appendSection = (title, headers, rows) => {
+      csv += `${escapeCsv(title)}\n`;
+      csv += `${headers.map(escapeCsv).join(",")}\n`;
+      rows.forEach((row) => {
+        csv += `${row.map(escapeCsv).join(",")}\n`;
+      });
+      csv += "\n";
+    };
+
     const choiceSummary =
       policy.pollType === "likert"
         ? (policy.likertLabels || []).join(" | ")
         : (policy.pollOptions || [])
             .map((option) => option.text || option.id)
             .join(" | ");
-
-    let csv =
-      "field,value\n" +
-      `Policy Title,${escapeCsv(policy.title)}\n` +
-      `Policy Description,${escapeCsv(policy.description)}\n` +
-      `Policy Code,${escapeCsv(policy.policyCode)}\n` +
-      `Poll Type,${escapeCsv(policy.pollType)}\n` +
-      `Target Regions,${escapeCsv((policy.targetRegions || []).join(" | "))}\n` +
-      `Choices,${escapeCsv(choiceSummary)}\n` +
-      "\n" +
-      "voteId,channel,value,region,ageRange,gender,occupation,education,createdAt\n";
-    votes.forEach((v) => {
-      const valueStr = Array.isArray(v.value) ? v.value.join("|") : v.value;
-      csv += `${escapeCsv(v._id)},${escapeCsv(v.channel)},${escapeCsv(valueStr)},${escapeCsv(v.region || "")},${escapeCsv(v.demographics?.ageRange || "")},${escapeCsv(v.demographics?.gender || "")},${escapeCsv(v.demographics?.occupation || "")},${escapeCsv(v.demographics?.education || "")},${escapeCsv(v.createdAt.toISOString())}\n`;
+    const totalComments = comments.length;
+    const sentimentCounts = comments.reduce(
+      (acc, comment) => {
+        const label = comment.sentiment?.label;
+        if (label && acc[label] !== undefined) acc[label] += 1;
+        return acc;
+      },
+      { positive: 0, negative: 0, neutral: 0 },
+    );
+    const keywordCounts = {};
+    comments.forEach((comment) => {
+      (comment.keywords || []).forEach((keyword) => {
+        if (!keyword) return;
+        keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+      });
     });
+    const topKeywords = Object.entries(keywordCounts)
+      .sort((left, right) => right[1] - left[1])
+      .slice(0, 10);
+
+    const buildBreakdown = (items, valueGetter) => {
+      const counts = new Map();
+      items.forEach((item) => {
+        const key = valueGetter(item) || "Unknown";
+        counts.set(key, (counts.get(key) || 0) + 1);
+      });
+      return Array.from(counts.entries()).sort((left, right) =>
+        left[0].localeCompare(right[0]),
+      );
+    };
+
+    const appVoteCount = votes.filter((vote) => vote.channel === "app").length;
+    const smsVoteCount = votes.filter((vote) => vote.channel === "sms").length;
+
+    const metadataRows = [
+      ["Policy Title", policy.title],
+      ["Policy Description", policy.description],
+      ["Policy Code", policy.policyCode],
+      ["Poll Type", policy.pollType],
+      ["Status", policy.status],
+      ["Start Date", policy.startDate?.toISOString?.() || ""],
+      ["End Date", policy.endDate?.toISOString?.() || ""],
+      ["Target Regions", (policy.targetRegions || []).join(" | ")],
+      ["Topics", (policy.topics || []).join(" | ")],
+      ["Choices", choiceSummary],
+    ];
+
+    const filterRows = [
+      ["Start Date", startDate || "All"],
+      ["End Date", endDate || "All"],
+      ["Region", region || "All"],
+      ["Gender", gender || "All"],
+      ["Age Range", ageRange || "All"],
+      ["Occupation", occupation || "All"],
+      ["Education", education || "All"],
+    ];
+
+    const summaryRows = [
+      ["Total Votes", voteSummary.totalVotes || 0],
+      ["App Votes", appVoteCount],
+      ["SMS Votes", smsVoteCount],
+      ["Total Comments", totalComments],
+      ["Positive Comments", sentimentCounts.positive],
+      ["Negative Comments", sentimentCounts.negative],
+      ["Neutral Comments", sentimentCounts.neutral],
+    ];
+
+    if (policy.pollType === "binary") {
+      summaryRows.push(
+        ["Yes Count", voteSummary.yesCount || 0],
+        ["No Count", voteSummary.noCount || 0],
+        ["Yes Percentage", voteSummary.yesPercentage || 0],
+        ["No Percentage", voteSummary.noPercentage || 0],
+      );
+    } else if (policy.pollType === "approval") {
+      summaryRows.push(
+        ["Approve Count", voteSummary.approveCount || 0],
+        ["Reject Count", voteSummary.rejectCount || 0],
+        ["Abstain Count", voteSummary.abstainCount || 0],
+        ["Approve Percentage", voteSummary.approvePercentage || 0],
+        ["Reject Percentage", voteSummary.rejectPercentage || 0],
+        ["Abstain Percentage", voteSummary.abstainPercentage || 0],
+        ["Net Approval", voteSummary.netApproval || 0],
+      );
+    } else if (policy.pollType === "rating" || policy.pollType === "likert") {
+      summaryRows.push(["Average Rating", voteSummary.average || 0]);
+    }
+
+    const choiceRows =
+      policy.pollType === "multipleChoice"
+        ? (voteSummary.results || []).map((item) => [
+            item.id,
+            item.text,
+            item.count,
+            item.percentage,
+          ])
+        : policy.pollType === "rankedChoice"
+          ? (voteSummary.firstChoiceResults || []).map((item) => [
+              item.id,
+              item.text,
+              item.firstChoiceCount,
+              item.percentage,
+            ])
+          : [];
+
+    let csv = "";
+
+    appendSection("Policy Metadata", ["Field", "Value"], metadataRows);
+    appendSection("Applied Filters", ["Filter", "Value"], filterRows);
+    appendSection("Summary", ["Metric", "Value"], summaryRows);
+
+    if (choiceRows.length) {
+      appendSection(
+        policy.pollType === "rankedChoice"
+          ? "Choice Summary"
+          : "Option Summary",
+        ["Id", "Label", "Count", "Percentage"],
+        choiceRows,
+      );
+    }
+
+    appendSection(
+      "Top Keywords",
+      ["Keyword", "Count"],
+      topKeywords.map(([keyword, count]) => [keyword, count]),
+    );
+
+    appendSection(
+      "Votes By Region",
+      ["Region", "Count"],
+      buildBreakdown(votes, (vote) => vote.region),
+    );
+    appendSection(
+      "Votes By Gender",
+      ["Gender", "Count"],
+      buildBreakdown(votes, (vote) => vote.demographics?.gender),
+    );
+    appendSection(
+      "Votes By Age Range",
+      ["Age Range", "Count"],
+      buildBreakdown(votes, (vote) => vote.demographics?.ageRange),
+    );
+    appendSection(
+      "Votes By Occupation",
+      ["Occupation", "Count"],
+      buildBreakdown(votes, (vote) => vote.demographics?.occupation),
+    );
+    appendSection(
+      "Votes By Education",
+      ["Education", "Count"],
+      buildBreakdown(votes, (vote) => vote.demographics?.education),
+    );
+
+    appendSection(
+      "Raw Votes",
+      [
+        "voteId",
+        "channel",
+        "value",
+        "region",
+        "ageRange",
+        "gender",
+        "occupation",
+        "education",
+        "createdAt",
+      ],
+      votes.map((vote) => [
+        vote._id,
+        vote.channel,
+        Array.isArray(vote.value) ? vote.value.join("|") : vote.value,
+        vote.region || "",
+        vote.demographics?.ageRange || "",
+        vote.demographics?.gender || "",
+        vote.demographics?.occupation || "",
+        vote.demographics?.education || "",
+        vote.createdAt?.toISOString?.() || "",
+      ]),
+    );
+
+    appendSection(
+      "Raw Comments",
+      [
+        "commentId",
+        "userDisplayName",
+        "userEmail",
+        "language",
+        "sentiment",
+        "keywords",
+        "region",
+        "ageRange",
+        "gender",
+        "occupation",
+        "education",
+        "createdAt",
+        "text",
+      ],
+      comments.map((comment) => [
+        comment._id,
+        comment.userId?.displayName || "Anonymous",
+        comment.userId?.email || "",
+        comment.language || "",
+        comment.sentiment?.label || "",
+        (comment.keywords || []).join("|"),
+        comment.region || "",
+        comment.demographics?.ageRange || "",
+        comment.demographics?.gender || "",
+        comment.demographics?.occupation || "",
+        comment.demographics?.education || "",
+        comment.createdAt?.toISOString?.() || "",
+        comment.text,
+      ]),
+    );
 
     res.setHeader("Content-Type", "text/csv");
     res.setHeader(
