@@ -30,8 +30,6 @@ const upload = multer({
   },
 });
 
-const captchaMiddleware = require("../middleware/captcha");
-
 const optionalCitizenAuth = (req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   if (!token) return next();
@@ -44,8 +42,28 @@ router.post(
   optionalCitizenAuth,
   limiters.plannerRequest,
   upload.single("proofFile"),
-  captchaMiddleware,
   plannerController.requestPlanner,
+);
+
+// Get current user's planner request status
+router.get(
+  "/my-request",
+  auth(["citizen"]),
+  plannerController.getMyPlannerRequest,
+);
+
+// Get planner request history
+router.get(
+  "/my-request/history",
+  auth(["citizen"]),
+  plannerController.getMyPlannerRequestHistory,
+);
+
+// Cancel pending request
+router.delete(
+  "/my-request",
+  auth(["citizen"]),
+  plannerController.cancelMyPlannerRequest,
 );
 
 router.post(

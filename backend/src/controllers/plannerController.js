@@ -65,13 +65,132 @@ const normalizeLanguageCode = (value) => {
   return map[normalized] || null;
 };
 
-const countWords = (value) =>
-  String(value || "")
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean).length;
-
 // ==================== CITIZEN REQUESTS TO BECOME PLANNER ====================
+
+// Get current user's planner request status
+exports.getMyPlannerRequest = async (req, res) => {
+  try {
+    const userId = req.user?.id || null;
+    
+    if (!userId) {
+      return sendError(
+        res,
+        ErrorCodes.UNAUTHORIZED,
+        "Authentication required",
+        null,
+        401,
+      );
+    }
+
+    const request = await PlannerRequest.findOne({ userId })
+      .populate("reviewedBy", "email")
+      .sort({ createdAt: -1 })
+      .limit(1);
+
+    if (!request) {
+      return sendSuccess(res, null, "No planner request found");
+    }
+
+    return sendSuccess(res, request, "Planner request retrieved");
+  } catch (err) {
+    console.error(err);
+    return sendError(
+      res,
+      ErrorCodes.INTERNAL,
+      "Failed to fetch planner request",
+      null,
+      500,
+    );
+  }
+};
+
+// Get all planner requests history for current user
+exports.getMyPlannerRequestHistory = async (req, res) => {
+  try {
+    const userId = req.user?.id || null;
+    
+    if (!userId) {
+      return sendError(
+        res,
+        ErrorCodes.UNAUTHORIZED,
+        "Authentication required",
+        null,
+        401,
+      );
+    }
+
+    const requests = await PlannerRequest.find({ userId })
+      .populate("reviewedBy", "email")
+      .sort({ createdAt: -1 });
+
+    return sendSuccess(res, requests, "Planner request history retrieved");
+  } catch (err) {
+    console.error(err);
+    return sendError(
+      res,
+      ErrorCodes.INTERNAL,
+      "Failed to fetch planner request history",
+      null,
+      500,
+    );
+  }
+};
+
+// Cancel pending planner request
+exports.cancelMyPlannerRequest = async (req, res) => {
+  try {
+    const userId = req.user?.id || null;
+    
+    if (!userId) {
+      return sendError(
+        res,
+        ErrorCodes.UNAUTHORIZED,
+        "Authentication required",
+        null,
+        401,
+      );
+    }
+
+    const request = await PlannerRequest.findOne({
+      userId,
+      status: "pending",
+    });
+
+    if (!request) {
+      return sendError(
+        res,
+        ErrorCodes.NOT_FOUND,
+        "No pending request found to cancel",
+        null,
+        404,
+      );
+    }
+
+    request.status = "cancelled";
+    request.reviewedAt = new Date();
+    await request.save();
+
+    await createAuditLog({
+      userId,
+      userRole: "citizen",
+      action: "PLANNER_REQUEST_CANCELLED",
+      details: { requestId: request._id },
+      req,
+    });
+
+    return sendSuccess(res, null, "Planner request cancelled successfully");
+  } catch (err) {
+    console.error(err);
+    return sendError(
+      res,
+      ErrorCodes.INTERNAL,
+      "Failed to cancel planner request",
+      null,
+      500,
+    );
+  }
+};
+
 exports.requestPlanner = async (req, res) => {
   try {
     const {
@@ -100,11 +219,11 @@ exports.requestPlanner = async (req, res) => {
       );
     }
 
-    if (!reason || countWords(reason) < 10) {
+    if (!reason || reason.length < 50) {
       return sendError(
         res,
         ErrorCodes.VALIDATION,
-        "Reason must be at least 10 words.",
+        "Reason must be at least 50 characters.",
         null,
         400,
       );
@@ -238,7 +357,6 @@ exports.requestPlanner = async (req, res) => {
       organization: organization || "",
       reason,
       proofFile: uploadResult.secure_url,
-      proofFileName: req.file?.originalname || null,
     });
     await request.save();
     // Notify admins about the new planner request

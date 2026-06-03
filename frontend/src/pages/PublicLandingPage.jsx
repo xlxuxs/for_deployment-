@@ -167,6 +167,8 @@ export function PublicLandingPage() {
   const [landingData, setLandingData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [policyAnalyticsCache, setPolicyAnalyticsCache] = useState({});
+  const [expandedPolicies, setExpandedPolicies] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [theme, setTheme] = useState(getInitialTheme);
@@ -613,14 +615,133 @@ export function PublicLandingPage() {
 
                           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                             <SentimentBar policy={policy} />
-                            <Link
-                              to={`/public/policies/${policy.id}/analytics`}
-                              className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white transition hover:bg-teal-800"
-                            >
-                              <BarChart3 className="h-4 w-4" />
-                              {t("Analytics")}
-                            </Link>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={async () => {
+                                  const id = policy.id;
+                                  // toggle expanded
+                                  setExpandedPolicies((cur) => ({ ...cur, [id]: !cur[id] }));
+                                  if (!policyAnalyticsCache[id]) {
+                                    try {
+                                      // optimistic set loading flag
+                                      setPolicyAnalyticsCache((c) => ({ ...c, [id]: { loading: true } }));
+                                      const data = await publicApi.getPolicyAnalytics(id);
+                                      setPolicyAnalyticsCache((c) => ({ ...c, [id]: { loading: false, data } }));
+                                    } catch (err) {
+                                      setPolicyAnalyticsCache((c) => ({ ...c, [id]: { loading: false, error: getErrorMessage(err) } }));
+                                    }
+                                  }
+                                }}
+                                className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white transition hover:bg-teal-800"
+                              >
+                                <BarChart3 className="h-4 w-4" />
+                                {expandedPolicies[policy.id] ? t("Hide") : t("Analytics")}
+                              </button>
+                              <Link
+                                to={`/public/policies/${policy.id}/analytics`}
+                                className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                              >
+                                {t("Open full page")}
+                              </Link>
+                            </div>
                           </div>
+
+                          {expandedPolicies[policy.id] && (
+                            <div className="mt-4 rounded-lg border-t pt-4">
+                              {policyAnalyticsCache[policy.id]?.loading ? (
+                                <p className="text-sm text-slate-500">{t("Loading analytics...")}</p>
+                              ) : policyAnalyticsCache[policy.id]?.error ? (
+                                <p className="text-sm text-rose-600">{policyAnalyticsCache[policy.id].error}</p>
+                              ) : policyAnalyticsCache[policy.id]?.data ? (
+                                <div className="grid gap-4 lg:grid-cols-3">
+                                  {/* Vote summary */}
+                                  <div className="rounded-lg border px-4 py-3">
+                                    <p className="text-xs font-semibold text-slate-600">{t("Votes summary")}</p>
+                                    <div className="mt-2">
+                                      {(() => {
+                                        const data = policyAnalyticsCache[policy.id].data;
+                                        if (!data) return null;
+                                        if (data.pollType === "binary") {
+                                          return (
+                                            <div>
+                                              <p className="text-sm font-semibold">{t("Yes")}: {data.yesCount ?? 0} ({data.yesPercentage ?? 0}%)</p>
+                                              <p className="text-sm font-semibold">{t("No")}: {data.noCount ?? 0} ({data.noPercentage ?? 0}%)</p>
+                                            </div>
+                                          );
+                                        }
+                                        if (data.pollType === "multipleChoice") {
+                                          return (
+                                            <div className="space-y-2">
+                                              {(data.results || []).map((r) => (
+                                                <div key={r.id} className="flex items-center justify-between">
+                                                  <div className="text-sm">{r.text}</div>
+                                                  <div className="text-sm font-semibold">{r.count}</div>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          );
+                                        }
+                                        if (data.pollType === "rating" || data.pollType === "likert") {
+                                          return (
+                                            <div>
+                                              <p className="text-sm font-semibold">{t("Average")}: {data.average ?? data.averageRating ?? 0}</p>
+                                              <div className="mt-2 space-y-1">
+                                                {Object.entries(data.distribution || {}).map(([k, v]) => (
+                                                  <div key={k} className="flex items-center justify-between text-sm">
+                                                    <div>{k} {t("star")}</div>
+                                                    <div className="font-semibold">{v}</div>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          );
+                                        }
+                                        if (data.pollType === "approval") {
+                                          return (
+                                            <div>
+                                              <p className="text-sm">{t("Approve")}: {data.approveCount || 0}</p>
+                                              <p className="text-sm">{t("Reject")}: {data.rejectCount || 0}</p>
+                                              <p className="text-sm">{t("Abstain")}: {data.abstainCount || 0}</p>
+                                            </div>
+                                          );
+                                        }
+                                        return <div className="text-sm">{t("Total votes")}: {data.totalVotes || 0}</div>;
+                                      })()}
+                                    </div>
+                                  </div>
+
+                                  {/* Sentiment and keywords */}
+                                  <div className="rounded-lg border px-4 py-3">
+                                    <p className="text-xs font-semibold text-slate-600">{t("Sentiment")}</p>
+                                    <div className="mt-3">
+                                      <p className="text-sm font-semibold">{t("Positive")}: {policyAnalyticsCache[policy.id].data.sentimentCounts.positive || 0}</p>
+                                      <p className="text-sm font-semibold">{t("Neutral")}: {policyAnalyticsCache[policy.id].data.sentimentCounts.neutral || 0}</p>
+                                      <p className="text-sm font-semibold">{t("Negative")}: {policyAnalyticsCache[policy.id].data.sentimentCounts.negative || 0}</p>
+                                    </div>
+                                    <div className="mt-3">
+                                      <p className="text-xs font-semibold text-slate-600">{t("Top Keywords")}</p>
+                                      <div className="mt-2 flex flex-wrap gap-2">
+                                        {(policyAnalyticsCache[policy.id].data.topKeywords || []).slice(0,6).map((k) => (
+                                          <span key={k.keyword} className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">{k.keyword}</span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Details / link */}
+                                  <div className="rounded-lg border px-4 py-3">
+                                    <p className="text-xs font-semibold text-slate-600">{t("Details")}</p>
+                                    <div className="mt-2 text-sm">
+                                      <p>{t("Poll type")}: {policyAnalyticsCache[policy.id].data.pollType}</p>
+                                      <p>{t("Total votes")}: {policyAnalyticsCache[policy.id].data.totalVotes}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-slate-500">{t("No analytics available")}</p>
+                              )}
+                            </div>
+                          )}
                         </article>
                       );
                     })
