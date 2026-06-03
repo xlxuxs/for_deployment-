@@ -297,6 +297,59 @@ export function DashboardPage() {
     return { draftCount, activeCount, publishedCount, closedCount, uniqueRegions, total: policies.length };
   }, [policies]);
 
+  const adminDashboardMetrics = useMemo(() => {
+    const stats = adminStats || {};
+    const totalPolicies = stats.policies?.total || 0;
+    const activePolicies = stats.policies?.active || 0;
+    const inProgressPolicies = (stats.policies?.draft || 0) + (stats.policies?.scheduled || 0);
+    const totalVotes = stats.votes?.total || 0;
+    const avgVotesPerActivePolicy = activePolicies > 0
+      ? (totalVotes / activePolicies).toFixed(1).replace(/\.0$/, "")
+      : "0";
+
+    if (!trends.length) {
+      return {
+        totalPolicies,
+        activePolicies,
+        inProgressPolicies,
+        totalVotes,
+        avgVotesPerActivePolicy,
+        engagementTrend: null,
+      };
+    }
+
+    const midpoint = Math.ceil(trends.length / 2);
+    const previousVotes = trends
+      .slice(0, midpoint)
+      .reduce((sum, item) => sum + (Number(item.votes) || 0), 0);
+    const recentVotes = trends
+      .slice(midpoint)
+      .reduce((sum, item) => sum + (Number(item.votes) || 0), 0);
+
+    let engagementTrend = null;
+    if (previousVotes > 0) {
+      const diffPercent = Math.round(((recentVotes - previousVotes) / previousVotes) * 100);
+      engagementTrend = {
+        value: Math.abs(diffPercent),
+        isPositive: diffPercent >= 0,
+      };
+    } else if (recentVotes > 0) {
+      engagementTrend = {
+        value: 100,
+        isPositive: true,
+      };
+    }
+
+    return {
+      totalPolicies,
+      activePolicies,
+      inProgressPolicies,
+      totalVotes,
+      avgVotesPerActivePolicy,
+      engagementTrend,
+    };
+  }, [adminStats, trends]);
+
   if (role === "comment_moderator") {
     return <CommentModerationPage />;
   }
@@ -304,6 +357,15 @@ export function DashboardPage() {
   if (loading) return <LoadingState label="Loading your dashboard" />;
 
   const stats = adminStats || {};
+  const isAdmin = role === "admin";
+  const displayedPolicyMetrics = isAdmin
+    ? {
+        total: adminDashboardMetrics.totalPolicies,
+        draftCount: adminDashboardMetrics.inProgressPolicies,
+        activeCount: adminDashboardMetrics.activePolicies,
+        uniqueRegions: policyMetrics.uniqueRegions,
+      }
+    : policyMetrics;
 
   const quickActions = [
     { to: "/policies/new", label: "Create Policy", icon: FileText, primary: true },
@@ -384,8 +446,8 @@ export function DashboardPage() {
           <div className="grid grid-cols-3 gap-3 lg:w-[420px]">
             {[
               { label: "Regions", value: policyMetrics.uniqueRegions, sub: "active" },
-              { label: "Live", value: policyMetrics.activeCount, sub: "policies" },
-              { label: "Engaged", value: formatNumber(stats.votes?.total || 0), sub: "votes" },
+              { label: "Live", value: displayedPolicyMetrics.activeCount, sub: "policies" },
+              { label: "Engaged", value: formatNumber(isAdmin ? adminDashboardMetrics.totalVotes : 0), sub: "votes" },
             ].map((stat) => (
               <div 
                 key={stat.label}
@@ -403,7 +465,7 @@ export function DashboardPage() {
       </section>
 
       {/* Admin Quick Actions */}
-      {role === "admin" && (
+      {isAdmin && (
         <section className="grid gap-4 md:grid-cols-3">
           {[
             {
@@ -448,21 +510,21 @@ export function DashboardPage() {
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard
           label={role === "admin" ? "Total Policies" : "My Policies"}
-          value={formatNumber(policyMetrics.total)}
+          value={formatNumber(displayedPolicyMetrics.total)}
           subtext={role === "admin" ? "Platform-wide" : "Created by you"}
           icon={FileText}
           color="violet"
         />
         <StatCard
           label="In Progress"
-          value={formatNumber(policyMetrics.draftCount)}
+          value={formatNumber(displayedPolicyMetrics.draftCount)}
           subtext="Draft & review stage"
           icon={File}
           color="amber"
         />
         <StatCard
           label="Active for Voting"
-          value={formatNumber(policyMetrics.activeCount)}
+          value={formatNumber(displayedPolicyMetrics.activeCount)}
           subtext="Citizens can participate"
           icon={PlayCircle}
           color="emerald"
@@ -470,23 +532,23 @@ export function DashboardPage() {
       </section>
 
       {/* Secondary Metrics Row */}
-      <div className={`grid gap-4 ${role === "admin" ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
-        {role === "admin" ? (
+      <div className={`grid gap-4 ${isAdmin ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
+        {isAdmin ? (
           <>
             <StatCard
               label="Total Votes Cast"
-              value={formatNumber(stats.votes?.total || 0)}
+              value={formatNumber(adminDashboardMetrics.totalVotes)}
               subtext={`${formatNumber(stats.votes?.app || 0)} app • ${formatNumber(stats.votes?.sms || 0)} SMS`}
               icon={Vote}
               color="blue"
             />
             <StatCard
               label="Avg. Engagement"
-              value={`${stats.engagement?.avgVotesPerPolicy || 0}`}
+              value={adminDashboardMetrics.avgVotesPerActivePolicy}
               subtext="Votes per active policy"
               icon={BarChart3}
               color="emerald"
-              trend={{ value: 12, isPositive: true }}
+              trend={adminDashboardMetrics.engagementTrend}
             />
           </>
         ) : (

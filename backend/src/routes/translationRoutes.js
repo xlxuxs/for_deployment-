@@ -4,10 +4,10 @@ const translationController = require("../controllers/translationController");
 const auth = require("../middleware/authMiddleware");
 const limiters = require("../config/rateLimits");
 
-// All authenticated users (citizen, planner, admin) can translate
+// All authenticated users (including comment moderators) can translate
 router.post(
   "/",
-  auth(["citizen", "planner", "admin"]),
+  auth(["citizen", "planner", "admin", "comment_moderator"]),
   limiters.analyticsRead,
   translationController.translate,
 );

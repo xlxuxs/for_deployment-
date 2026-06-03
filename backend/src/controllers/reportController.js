@@ -38,6 +38,7 @@ exports.getDashboardStats = async (req, res) => {
       activePlanners,
       totalPolicies,
       draftPolicies,
+      scheduledPolicies,
       activePolicies,
       closedPolicies,
       totalVotes,
@@ -54,6 +55,7 @@ exports.getDashboardStats = async (req, res) => {
       User.countDocuments({ role: "planner", active: true }),
       Policy.countDocuments(),
       Policy.countDocuments({ status: "draft" }),
+      Policy.countDocuments({ status: "scheduled" }),
       Policy.countDocuments({ status: "active" }),
       Policy.countDocuments({ status: "closed" }),
       Vote.countDocuments(),
@@ -122,6 +124,7 @@ exports.getDashboardStats = async (req, res) => {
         policies: {
           total: totalPolicies,
           draft: draftPolicies,
+          scheduled: scheduledPolicies,
           active: activePolicies,
           closed: closedPolicies,
         },
