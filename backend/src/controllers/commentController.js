@@ -46,6 +46,13 @@ const buildSortOption = (sort) => {
   }
 };
 
+const formatCommentUser = (userInfo) => ({
+  id: userInfo?._id || userInfo?.id || null,
+  _id: userInfo?._id || userInfo?.id || null,
+  displayName: userInfo?.displayName || "Anonymous",
+  email: userInfo?.email || null,
+});
+
 // Helper to get the latest version of a comment thread
 const getLatestVersion = async (originalCommentId) => {
   const query = originalCommentId
@@ -440,22 +447,8 @@ exports.getPolicyComments = async (req, res) => {
       _id: c._id,
       id: c._id,
       text: c.text,
-      user: c.userId
-        ? {
-            id: c.userId,
-            displayName:
-              userMap.get(c.userId.toString())?.displayName || "Anonymous",
-            email: userMap.get(c.userId.toString())?.email || null,
-          }
-        : null,
-      userId: c.userId
-        ? {
-            _id: c.userId,
-            displayName:
-              userMap.get(c.userId.toString())?.displayName || "Anonymous",
-            email: userMap.get(c.userId.toString())?.email || null,
-          }
-        : null,
+      user: c.userId ? formatCommentUser({ ...userMap.get(c.userId.toString()), id: c.userId }) : null,
+      userId: c.userId ? formatCommentUser({ ...userMap.get(c.userId.toString()), _id: c.userId }) : null,
       policyId: c.policyId,
       parentCommentId: c.parentCommentId,
       visibility: c.visibility,
@@ -525,20 +518,8 @@ exports.getCommentById = async (req, res) => {
     const formatted = {
       id: comment._id,
       text: comment.text,
-      user: comment.userId
-        ? {
-            id: comment.userId._id,
-            displayName: comment.userId.displayName,
-            email: comment.userId.email || null,
-          }
-        : null,
-      userId: comment.userId
-        ? {
-            _id: comment.userId._id,
-            displayName: comment.userId.displayName,
-            email: comment.userId.email || null,
-          }
-        : null,
+      user: comment.userId ? formatCommentUser(comment.userId) : null,
+      userId: comment.userId ? formatCommentUser(comment.userId) : null,
       policyId: comment.policyId,
       parentCommentId: comment.parentCommentId,
       visibility: comment.visibility,
@@ -656,20 +637,8 @@ exports.getReplies = async (req, res) => {
       _id: r._id,
       id: r._id,
       text: r.text,
-      user: r.userId
-        ? {
-            id: r.userId._id,
-            displayName: r.userId.displayName,
-            email: r.userId.email || null,
-          }
-        : null,
-      userId: r.userId
-        ? {
-            _id: r.userId._id,
-            displayName: r.userId.displayName,
-            email: r.userId.email || null,
-          }
-        : null,
+      user: r.userId ? formatCommentUser(r.userId) : null,
+      userId: r.userId ? formatCommentUser(r.userId) : null,
       parentCommentId: r.parentCommentId,
       visibility: r.visibility,
       reportState: r.reportState,

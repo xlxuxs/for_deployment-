@@ -152,8 +152,7 @@ exports.submitAppVote = async (req, res) => {
         text: comment.trim(),
         demographics: demographicsSnapshot,
         visibility: "visible",
-        moderationStatus: "pending_ai",
-        moderationReason: "pending_ai",
+        aiStatus: "pending",
       });
       await commentDoc.save();
     }
