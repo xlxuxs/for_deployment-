@@ -1474,6 +1474,7 @@ exports.getComments = async (req, res) => {
       const base = {
         id: c._id,
         text: c.text,
+        language: c.language,
         moderationStatus: moderationStatus,
         visibility: c.visibility,
         isOfficialReply: c.isOfficialReply,

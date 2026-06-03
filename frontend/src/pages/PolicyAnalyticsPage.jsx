@@ -1252,6 +1252,7 @@ export function PolicyAnalyticsPage() {
                           <div className="mt-3 flex flex-wrap items-center gap-3">
                             <LanguageSelector
                               text={comment.text}
+                              sourceLang={comment.language || null}
                               onTranslated={(translatedText) =>
                                 handleCommentTranslation(
                                   comment.id,

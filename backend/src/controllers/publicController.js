@@ -262,6 +262,7 @@ exports.getPolicyComments = async (req, res) => {
     const formatted = comments.map((c) => ({
       id: c._id,
       text: c.text,
+      language: c.language,
       sentiment: c.sentiment?.label,
       confidence: c.sentiment?.confidence,
       keywords: c.keywords,

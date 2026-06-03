@@ -431,6 +431,7 @@ export function PolicyDetailPage() {
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <LanguageSelector
                 text={text}
+                sourceLang={c.language || null}
                 onTranslated={(translatedText) =>
                   setTranslatedComment(commentId, translatedText)
                 }
@@ -855,6 +856,7 @@ export function PolicyDetailPage() {
                       <div className="mt-3 flex flex-wrap items-center gap-3">
                         <LanguageSelector
                           text={getCommentText(comment)}
+                          sourceLang={comment.language || null}
                           onTranslated={(translatedText) =>
                             setTranslatedComment(comment._id, translatedText)
                           }
@@ -962,6 +964,7 @@ export function PolicyDetailPage() {
                     <div className="mt-3 flex flex-wrap items-center gap-3">
                       <LanguageSelector
                         text={getCommentText(comment)}
+                        sourceLang={comment.language || null}
                         onTranslated={(translatedText) =>
                           setTranslatedComment(comment._id, translatedText)
                         }
@@ -1036,6 +1039,7 @@ export function PolicyDetailPage() {
                       <div className="mt-3 flex flex-wrap items-center gap-3">
                         <LanguageSelector
                           text={getCommentText(comment)}
+                          sourceLang={comment.language || null}
                           onTranslated={(translatedText) =>
                             setTranslatedComment(comment._id, translatedText)
                           }

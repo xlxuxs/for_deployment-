@@ -8,7 +8,7 @@ const LANG_OPTIONS = [
   { code: "ti", label: "Tigrinya" },
 ];
 
-export default function LanguageSelector({ text, onTranslated }) {
+export default function LanguageSelector({ text, sourceLang = null, onTranslated }) {
   const [target, setTarget] = useState("en");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -18,7 +18,11 @@ export default function LanguageSelector({ text, onTranslated }) {
     setLoading(true);
     setError(null);
     try {
-      const result = await translateText({ text, targetLang: target });
+      const result = await translateText({
+        text,
+        targetLang: target,
+        sourceLang,
+      });
       if (onTranslated) onTranslated(result, target);
     } catch (e) {
       setError(e.message || "Translation failed");
