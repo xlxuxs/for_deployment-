@@ -400,10 +400,15 @@ exports.getPolicyComments = async (req, res) => {
         404,
       );
 
-    const filter = { policyId, ...buildVisibilityFilter(req.user) };
+    const filter = {
+      policyId: new mongoose.Types.ObjectId(policyId),
+      ...buildVisibilityFilter(req.user),
+    };
     if (parentCommentId === "null" || parentCommentId === null)
       filter.parentCommentId = null;
-    else if (parentCommentId) filter.parentCommentId = parentCommentId;
+    else if (parentCommentId) {
+      filter.parentCommentId = new mongoose.Types.ObjectId(parentCommentId);
+    }
     if (sentiment) filter["sentiment.label"] = sentiment;
     if (visibility && ["planner", "admin"].includes(req.user.role))
       filter.visibility = visibility;
