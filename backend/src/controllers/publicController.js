@@ -74,12 +74,10 @@ exports.getLandingData = async (_req, res) => {
       ]),
     );
 
-    // Only include closed policies that are explicitly marked public via citizenAnalyticsVisibility
     const policies = closedPolicies
       .map((policy) => {
         const vis = policy.citizenAnalyticsVisibility || {};
         const allAllowed = vis.showResults && vis.showBreakdown && vis.showComments && vis.showSentiment && vis.allowTimeFilter;
-        if (!allAllowed) return null;
         const policyId = toIdString(policy._id);
         const voteCount = votesByPolicy.get(policyId) || 0;
         const commentSummary = commentsByPolicy.get(policyId) || {
@@ -94,12 +92,12 @@ exports.getLandingData = async (_req, res) => {
           policyCode: policy.policyCode,
           targetRegions: policy.targetRegions,
           endDate: policy.endDate,
+          analyticsAvailable: allAllowed,
           voteCount,
           commentCount: commentSummary.totalComments,
           sentiment: commentSummary.sentiment,
         };
       })
-      .filter(Boolean)
       .sort((left, right) => right.voteCount - left.voteCount || new Date(right.endDate) - new Date(left.endDate));
 
     const summary = policies.reduce(

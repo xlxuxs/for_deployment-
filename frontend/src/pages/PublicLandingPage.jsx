@@ -617,7 +617,9 @@ export function PublicLandingPage() {
                             <SentimentBar policy={policy} />
                             <div className="flex items-center gap-2">
                               <button
+                                disabled={!policy.analyticsAvailable}
                                 onClick={async () => {
+                                  if (!policy.analyticsAvailable) return;
                                   const id = policy.id;
                                   // toggle expanded
                                   setExpandedPolicies((cur) => ({ ...cur, [id]: !cur[id] }));
@@ -632,17 +634,23 @@ export function PublicLandingPage() {
                                     }
                                   }
                                 }}
-                                className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white transition hover:bg-teal-800"
+                                className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-400"
                               >
                                 <BarChart3 className="h-4 w-4" />
-                                {expandedPolicies[policy.id] ? t("Hide") : t("Analytics")}
+                                {!policy.analyticsAvailable
+                                  ? t("Analytics unavailable")
+                                  : expandedPolicies[policy.id]
+                                  ? t("Hide")
+                                  : t("Analytics")}
                               </button>
-                              <Link
-                                to={`/public/policies/${policy.id}/analytics`}
-                                className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                              >
-                                {t("Open full page")}
-                              </Link>
+                              {policy.analyticsAvailable ? (
+                                <Link
+                                  to={`/public/policies/${policy.id}/analytics`}
+                                  className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                                >
+                                  {t("Open full page")}
+                                </Link>
+                              ) : null}
                             </div>
                           </div>
 
