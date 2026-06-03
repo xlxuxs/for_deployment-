@@ -32,7 +32,6 @@ const getTransporter = async ({ requireDelivery = false } = {}) => {
       const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
       const user = process.env.SMTP_USER || process.env.EMAIL_USER;
       const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
-      const port = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT || "587", 10);
 
       if (!host || !user || !pass) {
         const reason =
@@ -46,9 +45,11 @@ const getTransporter = async ({ requireDelivery = false } = {}) => {
 
       const candidate = nodemailer.createTransport({
         host,
-        port,
-        secure: port === 465,
+        port: 587,
+        secure: false,
+        requireTLS: true,
         auth: { user, pass },
+        connectionTimeout: 10000,
       });
 
       try {
