@@ -150,6 +150,46 @@ function TabPane({ children }) {
   return <div>{children}</div>;
 }
 
+const getPolicyChoiceSummary = (policy) => {
+  if (!policy) return [];
+
+  if (policy.pollType === "binary") {
+    return ["Yes", "No"];
+  }
+
+  if (policy.pollType === "rating") {
+    return ["1 star", "2 stars", "3 stars", "4 stars", "5 stars"];
+  }
+
+  if (policy.pollType === "likert") {
+    return (policy.likertLabels || []).map(
+      (label, index) => `${index + 1}. ${label}`,
+    );
+  }
+
+  if (policy.pollType === "multipleChoice") {
+    const options = (policy.pollOptions || []).map((option) => option.text);
+    if (policy.maxSelections > 1) {
+      options.push(`Select up to ${policy.maxSelections}`);
+    }
+    return options;
+  }
+
+  if (policy.pollType === "approval") {
+    return (policy.pollOptions || []).map((option) => option.text);
+  }
+
+  if (policy.pollType === "rankedChoice") {
+    const options = (policy.pollOptions || []).map((option) => option.text);
+    if (policy.rankedChoiceMaxRank) {
+      options.push(`Rank up to ${policy.rankedChoiceMaxRank}`);
+    }
+    return options;
+  }
+
+  return [];
+};
+
 export function PolicyAnalyticsPage() {
   const { id } = useParams();
   const { user, role } = useAuth();
@@ -587,6 +627,8 @@ export function PolicyAnalyticsPage() {
     },
   ];
 
+  const policyChoices = getPolicyChoiceSummary(policy);
+
   if (loading) return <LoadingState label="Loading analytics" />;
 
   return (
@@ -625,6 +667,38 @@ export function PolicyAnalyticsPage() {
       <div className="space-y-3">
         <ErrorAlert message={error} />
         {policy ? <StatusBadge status={policy.status} /> : null}
+        {policyChoices.length ? (
+          <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+                  Poll Setup
+                </p>
+                <p className="mt-1 text-sm text-slate-600">
+                  Type:{" "}
+                  <span className="font-semibold text-slate-900">
+                    {policy.pollType}
+                  </span>
+                </p>
+              </div>
+              <div className="md:max-w-[70%]">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+                  Choices
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {policyChoices.map((choice) => (
+                    <span
+                      key={choice}
+                      className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-700"
+                    >
+                      {choice}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : null}
       </div>
 
       {!canViewAnalytics ? (
