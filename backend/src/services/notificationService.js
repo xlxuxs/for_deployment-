@@ -22,6 +22,14 @@ const createNotification = async ({
     const user = await User.findById(userId);
     if (!user) return null;
 
+    if (!Notification.schema.path("type").enumValues.includes(type)) {
+      logger.error(
+        { userId, type, title, source },
+        "Invalid notification type rejected",
+      );
+      return null;
+    }
+
     const notification = new Notification({
       userId,
       userRole: user.role,
@@ -65,7 +73,10 @@ const createNotification = async ({
 
     return notification;
   } catch (err) {
-    console.error("Failed to create notification:", err);
+    logger.error(
+      { error: err.message, stack: err.stack, userId, type, title, source },
+      "Failed to create notification",
+    );
     return null;
   }
 };

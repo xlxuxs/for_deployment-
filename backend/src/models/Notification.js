@@ -38,6 +38,7 @@ const notificationSchema = new mongoose.Schema(
         // Comments
         "COMMENT_REPLY",
         "COMMENT_FLAGGED",
+        "COMMENT_HIDDEN",
         "COMMENT_APPEAL",
         "APPEAL_RESOLVED",
 
