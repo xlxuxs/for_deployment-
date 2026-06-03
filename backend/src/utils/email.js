@@ -1,8 +1,8 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 const logger = require("./logger");
 
-let transporter = null;
-let transporterPromise = null;
+let resendClient = null;
+let resendClientPromise = null;
 let mockMode = false;
 let mockReason = null;
 
@@ -12,12 +12,12 @@ const getUnavailableError = () =>
 const setMockMode = (reason) => {
   mockMode = true;
   mockReason = reason;
-  transporter = null;
-  transporterPromise = null;
+  resendClient = null;
+  resendClientPromise = null;
   logger.warn(`Email: ${reason}. Switching to mock mode.`);
 };
 
-const getTransporter = async ({ requireDelivery = false } = {}) => {
+const getResendClient = async ({ requireDelivery = false } = {}) => {
   if (mockMode) {
     if (requireDelivery) {
       throw getUnavailableError();
@@ -25,17 +25,14 @@ const getTransporter = async ({ requireDelivery = false } = {}) => {
     return null;
   }
 
-  if (transporter) return transporter;
+  if (resendClient) return resendClient;
 
-  if (!transporterPromise) {
-    transporterPromise = (async () => {
-      const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
-      const user = process.env.SMTP_USER || process.env.EMAIL_USER;
-      const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+  if (!resendClientPromise) {
+    resendClientPromise = (async () => {
+      const apiKey = process.env.RESEND_API_KEY;
 
-      if (!host || !user || !pass) {
-        const reason =
-          "Missing SMTP credentials (SMTP_HOST/SMTP_USER/SMTP_PASS or EMAIL_HOST/EMAIL_USER/EMAIL_PASS)";
+      if (!apiKey) {
+        const reason = "Missing Resend credentials (RESEND_API_KEY)";
         if (requireDelivery) {
           throw new Error(reason);
         }
@@ -43,34 +40,25 @@ const getTransporter = async ({ requireDelivery = false } = {}) => {
         return null;
       }
 
-      const candidate = nodemailer.createTransport({
-        host,
-        port: 587,
-        secure: false,
-        requireTLS: true,
-        auth: { user, pass },
-        connectionTimeout: 10000,
-      });
-
       try {
-        await candidate.verify();
-        transporter = candidate;
-        logger.info("SMTP configured and ready.");
-        return transporter;
+        const candidate = new Resend(apiKey);
+        resendClient = candidate;
+        logger.info("Resend configured and ready.");
+        return resendClient;
       } catch (error) {
-        const reason = `SMTP connection failed: ${error.message}`;
+        const reason = `Resend client initialization failed: ${error.message}`;
         if (requireDelivery) {
           throw new Error(reason);
         }
         setMockMode(reason);
         return null;
       } finally {
-        transporterPromise = null;
+        resendClientPromise = null;
       }
     })();
   }
 
-  return transporterPromise;
+  return resendClientPromise;
 };
 
 /**
@@ -108,8 +96,8 @@ const sendEmail = async (to, subject, text, html) => {
     return { delivered: false, mode: "mock", reason: mockReason };
   }
 
-  const transporter = await getTransporter({ requireDelivery });
-  if (!transporter) {
+  const resend = await getResendClient({ requireDelivery });
+  if (!resend) {
     if (requireDelivery) {
       throw getUnavailableError();
     }
@@ -118,15 +106,20 @@ const sendEmail = async (to, subject, text, html) => {
   }
 
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+    const { error } = await resend.emails.send({
+      from: "no-reply@abrowork.com",
       to,
       subject,
       text,
       html,
     });
+
+    if (error) {
+      throw new Error(error.message || "Unknown Resend error");
+    }
+
     logger.info(`Email sent to ${to} (${subject})`);
-    return { delivered: true, mode: "smtp" };
+    return { delivered: true, mode: "resend" };
   } catch (err) {
     logger.error({
       message: `Failed to send email to ${to}`,
@@ -149,9 +142,9 @@ const sendEmail = async (to, subject, text, html) => {
 const sendOtpEmail = async (to, otp) => {
   await sendEmail({
     to,
-    subject: "Your OTP Code - Civic Engagement Platform",
-    text: `Your verification code is: ${otp}\nIt expires in 5 minutes.`,
-    html: `<p>Your verification code is: <strong>${otp}</strong></p><p>It expires in 5 minutes.</p>`,
+    subject: "Your verification code",
+    text: `Your OTP is: ${otp}\nIt expires in 5 minutes.`,
+    html: `<p>Your OTP is: <strong>${otp}</strong></p><p>It expires in 5 minutes.</p>`,
     requireDelivery: true,
   });
 };

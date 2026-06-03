@@ -246,10 +246,7 @@ uvicorn app.main:app --reload --port 8000
 | `JWT_SECRET`       | Secret for signing tokens                | `change this`                                |
 | `REDIS_URL`        | Redis connection URL                     | `redis://localhost:6379`                     |
 | `AI_SERVICE_URL`   | URL of AI service                        | `http://localhost:8000`                      |
-| `EMAIL_HOST`       | SMTP server for OTP                      | `smtp.gmail.com`                             |
-| `EMAIL_PORT`       | SMTP port                                | `587`                                        |
-| `EMAIL_USER`       | Email account for sending OTP            | –                                            |
-| `EMAIL_PASS`       | App password or SMTP password            | –                                            |
+| `RESEND_API_KEY`   | Resend API key for transactional email   | –                                            |
 | `INTERNAL_API_KEY` | Secret key for AI service authentication | – (required)                                 |
 
 ### AI Service (`.env` in `ai-service/`)
