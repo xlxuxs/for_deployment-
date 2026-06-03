@@ -21,9 +21,9 @@ import { showToast } from "../lib/toast";
 
 function FieldPill({ label, value }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-950/70">
+    <div className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-950/70">
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">{value}</p>
+      <p className="mt-1 min-w-0 break-words text-sm font-semibold text-slate-900 dark:text-slate-100">{value}</p>
     </div>
   );
 }
@@ -67,6 +67,7 @@ export function PlannerRequestsPage() {
   const [reason, setReason] = useState("");
   const [requestSearch, setRequestSearch] = useState("");
   const [historySearch, setHistorySearch] = useState("");
+  const [previewingFile, setPreviewingFile] = useState(null);
 
   async function loadRequests({ silent = false } = {}) {
     if (!silent) {
@@ -201,6 +202,14 @@ export function PlannerRequestsPage() {
     }
 
     return t("Support file");
+  }
+
+  function getProofFileType(request) {
+    const fileName = (request.proofFileName || request.proofFile || "").toLowerCase();
+    if (/\.(png|jpe?g|webp|gif)(\?|$)/.test(fileName)) return "image";
+    if (/\.pdf(\?|$)/.test(fileName)) return "pdf";
+    if (/\.(doc|docx)(\?|$)/.test(fileName)) return "document";
+    return "unknown";
   }
 
   function matchesSearch(request, query, includeReviewer = false) {
@@ -383,19 +392,24 @@ export function PlannerRequestsPage() {
                         </div>
 
                         {request.proofFile ? (
-                          <a
-                            href={request.proofFile}
-                            target="_blank"
-                            rel="noreferrer"
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setPreviewingFile({
+                                url: request.proofFile,
+                                label: getProofFileLabel(request),
+                                type: getProofFileType(request),
+                              })
+                            }
                             className="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900"
                           >
                             <FileText className="h-4 w-4 text-teal-700 dark:text-teal-300" />
                             <span className="max-w-[16rem] truncate">{getProofFileLabel(request)}</span>
                             <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-teal-700 dark:bg-teal-500/10 dark:text-teal-300">
-                              {t("Open")}
+                              {t("Preview")}
                             </span>
                             <ExternalLink className="h-4 w-4" />
-                          </a>
+                          </button>
                         ) : null}
                       </div>
 
@@ -496,19 +510,24 @@ export function PlannerRequestsPage() {
                           ) : null}
 
                           {request.proofFile ? (
-                            <a
-                              href={request.proofFile}
-                              target="_blank"
-                              rel="noreferrer"
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setPreviewingFile({
+                                  url: request.proofFile,
+                                  label: getProofFileLabel(request),
+                                  type: getProofFileType(request),
+                                })
+                              }
                               className="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900"
                             >
                               <FileText className="h-4 w-4 text-teal-700 dark:text-teal-300" />
                               <span className="max-w-[16rem] truncate">{getProofFileLabel(request)}</span>
                               <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-teal-700 dark:bg-teal-500/10 dark:text-teal-300">
-                                {t("Open")}
+                                {t("Preview")}
                               </span>
                               <ExternalLink className="h-4 w-4" />
-                            </a>
+                            </button>
                           ) : null}
                         </div>
 
@@ -622,6 +641,46 @@ export function PlannerRequestsPage() {
               <button type="button" disabled={Boolean(actionLoading)} className="rounded-lg bg-rose-700 px-4 py-2 text-sm font-bold text-white hover:bg-rose-800 disabled:opacity-50 dark:bg-rose-600 dark:hover:bg-rose-500" onClick={reject}>
                 {t("Reject")}
               </button>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
+
+      {previewingFile ? (
+        <Modal title={previewingFile.label} onClose={() => setPreviewingFile(null)}>
+          <div className="space-y-4">
+            {previewingFile.type === "image" ? (
+              <img
+                src={previewingFile.url}
+                alt={previewingFile.label}
+                className="max-h-[70vh] w-full rounded-xl border border-slate-200 object-contain"
+              />
+            ) : null}
+
+            {previewingFile.type === "pdf" ? (
+              <iframe
+                src={previewingFile.url}
+                title={previewingFile.label}
+                className="h-[70vh] w-full rounded-xl border border-slate-200 bg-white"
+              />
+            ) : null}
+
+            {previewingFile.type !== "image" && previewingFile.type !== "pdf" ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                {t("This file type cannot be previewed here. Use the button below to open it in a new tab.")}
+              </div>
+            ) : null}
+
+            <div className="flex justify-end">
+              <a
+                href={previewingFile.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
+              >
+                <ExternalLink className="h-4 w-4" />
+                {t("Open in new tab")}
+              </a>
             </div>
           </div>
         </Modal>
