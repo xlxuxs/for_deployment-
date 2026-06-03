@@ -7,6 +7,7 @@ const helmet = require("helmet");
 const http = require("http");
 const socketIo = require("socket.io");
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
 const connectDB = require("./src/config/db");
 const redisClient = require("./src/config/redis");
 const requestLogger = require("./src/middleware/requestLogger");
@@ -102,10 +103,31 @@ const io = socketIo(server, {
 setSocketIO(io);
 
 io.on("connection", (socket) => {
-  const userId = socket.handshake.auth.userId;
-  if (userId) {
-    socket.join(`user:${userId}`);
-    console.log(`Socket connected for user ${userId}`);
+  const handshakeUserId = socket.handshake.auth?.userId;
+  const token = socket.handshake.auth?.token;
+  let socketUserId = handshakeUserId;
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      socketUserId = decoded.id;
+      if (handshakeUserId && handshakeUserId !== socketUserId) {
+        console.warn(
+          `Socket userId mismatch: handshake=${handshakeUserId}, token=${socketUserId}`,
+        );
+      }
+    } catch (err) {
+      console.warn(
+        `Socket token verification failed for handshake user ${handshakeUserId}: ${err.message}`,
+      );
+    }
+  }
+
+  if (socketUserId) {
+    socket.join(`user:${socketUserId}`);
+    console.log(`Socket connected for user ${socketUserId}`);
+  } else {
+    console.warn("Socket connected without a user identity");
   }
   socket.on("disconnect", () => console.log("Socket disconnected"));
 });
