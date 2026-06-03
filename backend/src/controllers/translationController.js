@@ -93,7 +93,8 @@ exports.translate = async (req, res) => {
       { text, source_lang: sourceLang, target_lang: targetLang },
       {
         headers: { "X-Internal-API-Key": INTERNAL_API_KEY },
-        timeout: 60000,
+        // Increased timeout to 200 seconds to accommodate slow translation backends
+        timeout: 200000,
       },
     );
     const translated = response.data.translated_text;
