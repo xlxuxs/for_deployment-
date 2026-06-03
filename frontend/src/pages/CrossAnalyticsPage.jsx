@@ -251,8 +251,15 @@ export function CrossAnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis allowDecimals={false} />
-                  <Tooltip />
-                  <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                  <Tooltip
+                    isAnimationActive={false}
+                    wrapperStyle={{ pointerEvents: "none" }}
+                  />
+                  <Bar
+                    dataKey="count"
+                    radius={[6, 6, 0, 0]}
+                    isAnimationActive={false}
+                  >
                     {sentimentData.map((entry) => (
                       <Cell
                         key={entry.name}
