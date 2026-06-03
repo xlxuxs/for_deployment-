@@ -798,20 +798,9 @@ export function PolicyDetailPage() {
 
         <TabPane tabId="comments">
           <Tabs tabs={commentsSubTabs} defaultTab="all">
-            {/* All comments tab: keep as is (list with delete only) */}
+            {/* All comments tab */}
             <TabPane tabId="all">
-              {renderCommentsList(allComments, [
-                {
-                  label: "Delete",
-                  icon: Trash2,
-                  onClick: (c) =>
-                    runAction(
-                      `delete-${c.id}`,
-                      () => adminApi.deleteComment(c.id),
-                      "Comment deleted.",
-                    ),
-                },
-              ])}
+              {renderCommentsList(allComments)}
             </TabPane>
 
             {/* AI Needs Review tab - same as CommentModerationPage's AI tab */}
@@ -874,7 +863,31 @@ export function PolicyDetailPage() {
                       </div>
                     </div>
                     <div className="mb-3 rounded-lg bg-slate-50 p-3">
-                      <p className="text-sm text-slate-900">{comment.text}</p>
+                      <p
+                        data-i18n-skip="true"
+                        className="text-sm text-slate-900"
+                      >
+                        {translatedComments[comment._id] ||
+                          getCommentText(comment) ||
+                          "Comment unavailable"}
+                      </p>
+                      <div className="mt-3 flex flex-wrap items-center gap-3">
+                        <LanguageSelector
+                          text={getCommentText(comment)}
+                          onTranslated={(translatedText) =>
+                            setTranslatedComment(comment._id, translatedText)
+                          }
+                        />
+                        {translatedComments[comment._id] && (
+                          <button
+                            type="button"
+                            onClick={() => revertTranslatedComment(comment._id)}
+                            className="rounded-lg border border-slate-200 px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                          >
+                            Show original
+                          </button>
+                        )}
+                      </div>
                     </div>
                     {comment.keywords?.length > 0 && (
                       <div className="mb-3">
@@ -931,19 +944,6 @@ export function PolicyDetailPage() {
                         className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
                       >
                         <RefreshCw className="h-3.5 w-3.5" /> Retry AI
-                      </button>
-                      <button
-                        onClick={() =>
-                          runAction(
-                            `delete-${comment._id}`,
-                            () => adminApi.deleteComment(comment._id),
-                            "Comment deleted.",
-                          )
-                        }
-                        disabled={isLoading || isProcessing}
-                        className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100 disabled:opacity-50"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" /> Delete
                       </button>
                     </div>
                   </div>
@@ -1013,18 +1013,6 @@ export function PolicyDetailPage() {
                       <CheckCircle className="h-3.5 w-3.5" /> Approve (Restore)
                     </button>
                     <button
-                      onClick={() =>
-                        runAction(
-                          `delete-${comment._id}`,
-                          () => adminApi.deleteComment(comment._id),
-                          "Comment deleted.",
-                        )
-                      }
-                      className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" /> Delete
-                    </button>
-                    <button
                       onClick={() => viewReports(comment._id)}
                       className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
                     >
@@ -1056,7 +1044,31 @@ export function PolicyDetailPage() {
                       </div>
                     </div>
                     <div className="mb-3 rounded-lg bg-slate-50 p-3">
-                      <p className="text-sm text-slate-900">{comment.text}</p>
+                      <p
+                        data-i18n-skip="true"
+                        className="text-sm text-slate-900"
+                      >
+                        {translatedComments[comment._id] ||
+                          getCommentText(comment) ||
+                          "Comment unavailable"}
+                      </p>
+                      <div className="mt-3 flex flex-wrap items-center gap-3">
+                        <LanguageSelector
+                          text={getCommentText(comment)}
+                          onTranslated={(translatedText) =>
+                            setTranslatedComment(comment._id, translatedText)
+                          }
+                        />
+                        {translatedComments[comment._id] && (
+                          <button
+                            type="button"
+                            onClick={() => revertTranslatedComment(comment._id)}
+                            className="rounded-lg border border-slate-200 px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                          >
+                            Show original
+                          </button>
+                        )}
+                      </div>
                     </div>
                     {comment.appeal && (
                       <div className="mb-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
