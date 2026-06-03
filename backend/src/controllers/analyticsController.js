@@ -1126,7 +1126,7 @@ exports.exportAnalytics = async (req, res) => {
     };
 
     const appendSection = (title, headers, rows) => {
-      csv += `${escapeCsv(title)}\n`;
+      csv += `${escapeCsv(`=== ${title} ===`)}\n`;
       csv += `${headers.map(escapeCsv).join(",")}\n`;
       rows.forEach((row) => {
         csv += `${row.map(escapeCsv).join(",")}\n`;
@@ -1187,16 +1187,6 @@ exports.exportAnalytics = async (req, res) => {
       ["Choices", choiceSummary],
     ];
 
-    const filterRows = [
-      ["Start Date", startDate || "All"],
-      ["End Date", endDate || "All"],
-      ["Region", region || "All"],
-      ["Gender", gender || "All"],
-      ["Age Range", ageRange || "All"],
-      ["Occupation", occupation || "All"],
-      ["Education", education || "All"],
-    ];
-
     const summaryRows = [
       ["Total Votes", voteSummary.totalVotes || 0],
       ["App Votes", appVoteCount],
@@ -1245,10 +1235,9 @@ exports.exportAnalytics = async (req, res) => {
             ])
           : [];
 
-    let csv = "";
+    let csv = "\uFEFF";
 
     appendSection("Policy Metadata", ["Field", "Value"], metadataRows);
-    appendSection("Applied Filters", ["Filter", "Value"], filterRows);
     appendSection("Summary", ["Metric", "Value"], summaryRows);
 
     if (choiceRows.length) {
@@ -1324,7 +1313,6 @@ exports.exportAnalytics = async (req, res) => {
       [
         "commentId",
         "userDisplayName",
-        "userEmail",
         "language",
         "sentiment",
         "keywords",
@@ -1339,7 +1327,6 @@ exports.exportAnalytics = async (req, res) => {
       comments.map((comment) => [
         comment._id,
         comment.userId?.displayName || "Anonymous",
-        comment.userId?.email || "",
         comment.language || "",
         comment.sentiment?.label || "",
         (comment.keywords || []).join("|"),
@@ -1353,7 +1340,7 @@ exports.exportAnalytics = async (req, res) => {
       ]),
     );
 
-    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader(
       "Content-Disposition",
       `attachment; filename="policy-${policyId}-export.csv"`,
