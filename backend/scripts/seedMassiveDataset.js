@@ -44,6 +44,10 @@ const COMMENTS_PER_LANGUAGE_SENTIMENT = Number(
 );
 const REPLIES_PER_POLICY = Number(process.env.SEED_REPLIES_PER_POLICY || 6);
 const SMS_VOTE_RATIO = Number(process.env.SEED_SMS_VOTE_RATIO || 0.28);
+const COMMENT_LANGUAGE = process.env.SEED_COMMENT_LANGUAGE || "en";
+const PUBLIC_DASHBOARD_CLOSED_POLICY_COUNT = Number(
+  process.env.SEED_PUBLIC_CLOSED_POLICY_COUNT || 10,
+);
 
 const nanoid = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 6);
 
@@ -840,6 +844,7 @@ const createUsers = async () => {
 const createPolicies = async ({ planners }) => {
   const policyDocs = [];
   const profiles = [];
+  let publicClosedPolicyCount = 0;
 
   for (let plannerIndex = 0; plannerIndex < planners.length; plannerIndex += 1) {
     const planner = planners[plannerIndex];
@@ -891,15 +896,28 @@ const createPolicies = async ({ planners }) => {
           ),
           government: true,
         },
-        citizenAnalyticsVisibility: {
-          showResults: true,
-          showBreakdown: globalIndex % 2 === 0,
-          showComments: globalIndex % 3 !== 1,
-          showSentiment: globalIndex % 4 !== 2,
-          allowTimeFilter: globalIndex % 5 !== 0,
-        },
+        citizenAnalyticsVisibility:
+          status === "closed" && publicClosedPolicyCount < PUBLIC_DASHBOARD_CLOSED_POLICY_COUNT
+            ? {
+                showResults: true,
+                showBreakdown: true,
+                showComments: true,
+                showSentiment: true,
+                allowTimeFilter: true,
+              }
+            : {
+                showResults: true,
+                showBreakdown: globalIndex % 2 === 0,
+                showComments: globalIndex % 3 !== 1,
+                showSentiment: globalIndex % 4 !== 2,
+                allowTimeFilter: globalIndex % 5 !== 0,
+              },
         topics: [topicKey, secondaryTopic],
       });
+
+      if (status === "closed" && publicClosedPolicyCount < PUBLIC_DASHBOARD_CLOSED_POLICY_COUNT) {
+        publicClosedPolicyCount += 1;
+      }
 
       profiles.push({
         planner,
@@ -1538,7 +1556,9 @@ const createComments = async ({
     const usedIds = new Set();
     let commentOffset = 0;
 
-    languages.forEach((language, languageIndex) => {
+    // Allow multiple languages across comments (one language per comment)
+    const policyLanguages = shuffle(languages).slice(0, Math.min(languages.length, 3));
+    policyLanguages.forEach((language, languageIndex) => {
       const sentimentCounts = getSentimentCommentCounts(
         policyIndex,
         languageIndex,
@@ -1558,14 +1578,31 @@ const createComments = async ({
             policy,
             commentOffset + localIndex + 1,
           );
-          const text = buildCommentText({
+          // base text for language/sentiment
+          let text = buildCommentText({
             language,
             sentiment,
             topicKey,
             user: citizen,
             policy,
           });
-          const confidence = sentiment === "neutral" ? 0.84 : 0.93;
+
+          // small localized suffixes to make individual comments visually different
+          const localizedSuffixes = {
+            en: ["", " Thanks for listening.", " I hope this helps.", " This matters."],
+            am: ["", " እናመሰግናለን።", " እባክዎ ይህን ይከታተሉ።", " ይህ ጉዳይ አስፈላጊ ነው።"],
+            om: ["", " Galatoomaa.", " Karaa kanaan isin galateeffadha.", " Kun dhimma guddaa dha."],
+            ti: ["", " የተመስገን።", " እባክዎ ይህን ይከታተሉ።", " እዚ ጉዳይ ኣስፈላጊ እዩ።"],
+          };
+          const suffixPool = localizedSuffixes[language] || localizedSuffixes.en;
+          const suffix = suffixPool[Math.floor(random() * suffixPool.length)];
+          text = text + suffix;
+
+          // vary confidence slightly so visualization changes
+          const baseConfidence = sentiment === "neutral" ? 0.78 : sentiment === "positive" ? 0.9 : 0.86;
+          const delta = (random() - 0.5) * 0.12; // +/-0.06
+          let confidence = Math.max(0.35, Math.min(0.99, +(baseConfidence + delta).toFixed(2)));
+
           const keywords = getKeywordSlice(
             topicKey,
             commentOffset + localIndex,
@@ -1642,7 +1679,7 @@ const createComments = async ({
     )[0];
     if (lowConfidenceUser) {
       const createdAt = buildCommentCreatedAt(policy, commentOffset + 4);
-      const language = lowConfidenceUser.preferredLanguage;
+      const language = COMMENT_LANGUAGE;
       const text = buildLowConfidenceText({
         language,
         topicKey,
@@ -1706,7 +1743,7 @@ const createComments = async ({
     )[0];
     if (flaggedUser) {
       const createdAt = buildCommentCreatedAt(policy, commentOffset + 8);
-      const language = flaggedUser.preferredLanguage;
+      const language = COMMENT_LANGUAGE;
       const text = buildReportedText({
         language,
         topicKey,
@@ -1825,7 +1862,7 @@ const createComments = async ({
     )[0];
     if (appealUser) {
       const createdAt = buildCommentCreatedAt(policy, commentOffset + 12);
-      const language = appealUser.preferredLanguage;
+      const language = COMMENT_LANGUAGE;
       const text = buildAppealText({ language, topicKey, user: appealUser });
       topLevelDocs.push({
         policyId: policy._id,

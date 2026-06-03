@@ -780,11 +780,15 @@ export function PolicyAnalyticsPage() {
                               <CartesianGrid strokeDasharray="3 3" />
                               <XAxis dataKey="rating" />
                               <YAxis allowDecimals={false} />
-                              <RechartsTooltip />
+                              <RechartsTooltip
+                                isAnimationActive={false}
+                                wrapperStyle={{ pointerEvents: "none" }}
+                              />
                               <Bar
                                 dataKey="votes"
                                 fill="#0f766e"
                                 radius={[6, 6, 0, 0]}
+                                isAnimationActive={false}
                               />
                             </BarChart>
                           </ResponsiveContainer>
@@ -870,11 +874,15 @@ export function PolicyAnalyticsPage() {
                               <CartesianGrid strokeDasharray="3 3" />
                               <XAxis dataKey="name" />
                               <YAxis allowDecimals={false} />
-                              <RechartsTooltip />
+                              <RechartsTooltip
+                                isAnimationActive={false}
+                                wrapperStyle={{ pointerEvents: "none" }}
+                              />
                               <Bar
                                 dataKey="votes"
                                 fill="#0f766e"
                                 radius={[6, 6, 0, 0]}
+                                isAnimationActive={false}
                               />
                             </BarChart>
                           </ResponsiveContainer>
@@ -904,7 +912,10 @@ export function PolicyAnalyticsPage() {
                                   />
                                 ))}
                               </Pie>
-                              <RechartsTooltip />
+                              <RechartsTooltip
+                                isAnimationActive={false}
+                                wrapperStyle={{ pointerEvents: "none" }}
+                              />
                               <Legend />
                             </PieChart>
                           </ResponsiveContainer>
@@ -984,13 +995,17 @@ export function PolicyAnalyticsPage() {
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="bucket" />
                         <YAxis />
-                        <RechartsTooltip />
+                        <RechartsTooltip
+                          isAnimationActive={false}
+                          wrapperStyle={{ pointerEvents: "none" }}
+                        />
                         <Line
                           type="monotone"
                           dataKey="value"
                           stroke="#0f766e"
                           strokeWidth={2}
                           dot={{ r: 2 }}
+                          isAnimationActive={false}
                         />
                       </LineChart>
                     </ResponsiveContainer>
@@ -1108,6 +1123,8 @@ export function PolicyAnalyticsPage() {
                           }
                         />
                         <RechartsTooltip
+                          isAnimationActive={false}
+                          wrapperStyle={{ pointerEvents: "none" }}
                           formatter={(value, name, item) => {
                             if (demographicsMetric === "sentiment") {
                               return [
@@ -1128,6 +1145,7 @@ export function PolicyAnalyticsPage() {
                             demographicsMetric === "sentiment" ? 6 : 0
                           }
                           radius={[6, 6, 0, 0]}
+                          isAnimationActive={false}
                         >
                           {demographicChartData.map((entry) => (
                             <Cell

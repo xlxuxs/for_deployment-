@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "seed:massive": "node scripts/seedMassiveDataset.js",
     "seed:public-analytics": "node scripts/seedPublicAnalyticsPolicies.js",
+    "seed:test-notifications": "node scripts/seedTestNotifications.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
