@@ -272,34 +272,58 @@ export function PolicyDetailPage() {
 
       // comments for this policy
       try {
-        const commentsResult = await commentApi.getPolicyComments(id, {
-          limit: 1000,
-        });
-        const rawComments =
-          commentsResult?.comments || commentsResult?.data || commentsResult || [];
-        const commentsList = (rawComments || []).map(normalizeComment);
-        setAllComments(commentsList || []);
-        setPendingComments(
-          (commentsList || []).filter(
-            (c) =>
-              c.reviewFlags?.sentimentReviewNeeded ||
-              c.reviewFlags?.moderationReviewNeeded ||
-              c.aiStatus === "pending",
-          ),
-        );
-        setReportedComments(
-          (commentsList || []).filter(
-            (c) =>
-              (c.reportCount || 0) > 0 ||
-              ["reported", "under_review", "actioned"].includes(c.reportState) ||
-              c.visibility === "hidden",
-          ),
-        );
-        setAppeals(
-          (commentsList || []).filter(
-            (c) => c.appeal && c.appeal.status === "pending",
-          ),
-        );
+        const [
+          visibleCommentsResult,
+          pendingCommentsResult,
+          reportedCommentsResult,
+          appealsResult,
+        ] = await Promise.allSettled([
+          analyticsApi.comments(id, { page: 1, limit: 1000 }),
+          adminApi.getAIReviewComments({ policyId: id }),
+          adminApi.getReportedComments({ policyId: id }),
+          adminApi.getPendingAppeals({ policyId: id, page: 1, limit: 1000 }),
+        ]);
+
+        const visibleComments =
+          visibleCommentsResult.status === "fulfilled"
+            ? (visibleCommentsResult.value?.comments || []).map(normalizeComment)
+            : [];
+        const pendingReviewComments =
+          pendingCommentsResult.status === "fulfilled"
+            ? (
+                pendingCommentsResult.value?.comments ||
+                pendingCommentsResult.value?.data ||
+                []
+              ).map(normalizeComment)
+            : [];
+        const reportedPolicyComments =
+          reportedCommentsResult.status === "fulfilled"
+            ? (
+                reportedCommentsResult.value?.comments ||
+                reportedCommentsResult.value?.data ||
+                []
+              ).map(normalizeComment)
+            : [];
+        const appealComments =
+          appealsResult.status === "fulfilled"
+            ? (
+                appealsResult.value?.appeals ||
+                appealsResult.value?.data ||
+                []
+              ).map((item) =>
+                normalizeComment({
+                  ...item,
+                  _id: item._id || item.commentId || item.id,
+                  id: item.id || item.commentId || item._id,
+                  userId: item.userId || item.author || item.appellant || null,
+                }),
+              )
+            : [];
+
+        setAllComments(visibleComments);
+        setPendingComments(pendingReviewComments);
+        setReportedComments(reportedPolicyComments);
+        setAppeals(appealComments);
       } catch (e) {
         setAllComments([]);
         setPendingComments([]);
