@@ -506,7 +506,7 @@ export function PolicyAnalyticsPage() {
       if (analytics?.pollType === "approval") return item.approvePercentage;
       return item.totalVotes;
     }
-    if (demographicsMetric === "sentiment") return item.averageSentiment;
+    if (demographicsMetric === "sentiment") return item.averageSentiment ?? 0;
     return item.totalVotes;
   };
   const hasSentiment =
@@ -534,6 +534,15 @@ export function PolicyAnalyticsPage() {
           0,
       )
     : [];
+  const demographicChartData = demographicData
+    .map((item) => ({
+      name: item[dimension] || "unknown",
+      value: getDemographicMetric(item),
+      totalComments: item.totalComments || 0,
+    }))
+    .filter((item) =>
+      demographicsMetric === "sentiment" ? item.totalComments > 0 : true,
+    );
 
   const tabs = [
     { id: "overview", label: "Overview" },
@@ -984,18 +993,32 @@ export function PolicyAnalyticsPage() {
                       label="Metric"
                     />
                   </div>
-                  {demographicData.length ? (
+                  {demographicChartData.length ? (
                     <ResponsiveContainer width="100%" height={400}>
                       <BarChart
-                        data={demographicData.map((item) => ({
-                          name: item[dimension],
-                          value: getDemographicMetric(item),
-                        }))}
+                        data={demographicChartData}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
-                        <YAxis />
-                        <RechartsTooltip />
+                        <YAxis
+                          domain={
+                            demographicsMetric === "sentiment"
+                              ? [-1, 1]
+                              : ["auto", "auto"]
+                          }
+                          ticks={
+                            demographicsMetric === "sentiment"
+                              ? [-1, -0.5, 0, 0.5, 1]
+                              : undefined
+                          }
+                        />
+                        <RechartsTooltip
+                          formatter={(value) =>
+                            demographicsMetric === "sentiment"
+                              ? [Number(value).toFixed(2), "Average sentiment"]
+                              : [value, "Value"]
+                          }
+                        />
                         <Bar
                           dataKey="value"
                           fill="#0f766e"

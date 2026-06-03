@@ -898,18 +898,42 @@ exports.getDemographicBreakdown = async (req, res) => {
       commentFilter[`demographics.${dimension}`] = { $exists: true };
     }
 
-    const commentPipeline = [
-      { $match: commentFilter },
-      {
-        $group: {
-          _id:
-            dimension === "region" ? "$region" : `$demographics.${dimension}`,
-          sentimentScores: { $push: "$sentiment.label" },
-          keywordList: { $push: "$keywords" },
-          commentCount: { $sum: 1 },
+    const commentPipeline = [{ $match: commentFilter }];
+
+    if (dimension === "region") {
+      commentPipeline.push(
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "commenter",
+          },
         },
+        {
+          $unwind: {
+            path: "$commenter",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $addFields: {
+            resolvedRegion: {
+              $ifNull: ["$region", "$commenter.region"],
+            },
+          },
+        },
+      );
+    }
+
+    commentPipeline.push({
+      $group: {
+        _id: dimension === "region" ? "$resolvedRegion" : `$demographics.${dimension}`,
+        sentimentScores: { $push: "$sentiment.label" },
+        keywordList: { $push: "$keywords" },
+        commentCount: { $sum: 1 },
       },
-    ];
+    });
 
     const cacheKey = generateCacheKey(
       "analytics:demographics",
@@ -988,6 +1012,7 @@ exports.getDemographicBreakdown = async (req, res) => {
         const existing = groupMap.get(group);
         existing.averageSentiment = parseFloat(avgSentiment);
         existing.topKeywords = topKeywords;
+        existing.totalComments = item.commentCount;
       } else {
         groupMap.set(group, {
           [dimension]: group,
