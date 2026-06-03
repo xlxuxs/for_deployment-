@@ -76,6 +76,15 @@ function buildTrendsLink(date) {
   return `/trends?${params.toString()}`;
 }
 
+function formatTrendRangeLabel(points) {
+  if (!points?.length) return "";
+  const first = points[0]?.date;
+  const last = points[points.length - 1]?.date;
+  if (!first || !last) return "";
+  if (first === last) return formatDate(first);
+  return `${formatDate(first)} to ${formatDate(last)}`;
+}
+
 // ─────────────────────────────────────────────────────────────
 // Reusable Sub-Components (extracted for clarity & reusability)
 // ─────────────────────────────────────────────────────────────
@@ -113,7 +122,10 @@ const StatCard = ({
           {subtext && <p className="text-xs text-slate-500">{t(subtext)}</p>}
           {trend && (
             <div className={`inline-flex items-center gap-1 text-xs font-medium ${trend.isPositive ? "text-emerald-600" : "text-rose-600"}`}>
-              {trend.isPositive ? "↑" : "↓"} {Math.abs(trend.value)}% {t("vs last period")}
+              {trend.isPositive ? "↑" : "↓"} {Math.abs(trend.value)}%{" "}
+              {trend.comparedRangeLabel
+                ? `vs ${trend.comparedRangeLabel}`
+                : t("vs last period")}
             </div>
           )}
         </div>
@@ -319,12 +331,13 @@ export function DashboardPage() {
     }
 
     const midpoint = Math.ceil(trends.length / 2);
-    const previousVotes = trends
-      .slice(0, midpoint)
+    const previousPeriod = trends.slice(0, midpoint);
+    const recentPeriod = trends.slice(midpoint);
+    const previousVotes = previousPeriod
       .reduce((sum, item) => sum + (Number(item.votes) || 0), 0);
-    const recentVotes = trends
-      .slice(midpoint)
+    const recentVotes = recentPeriod
       .reduce((sum, item) => sum + (Number(item.votes) || 0), 0);
+    const comparedRangeLabel = formatTrendRangeLabel(previousPeriod);
 
     let engagementTrend = null;
     if (previousVotes > 0) {
@@ -332,11 +345,13 @@ export function DashboardPage() {
       engagementTrend = {
         value: Math.abs(diffPercent),
         isPositive: diffPercent >= 0,
+        comparedRangeLabel,
       };
     } else if (recentVotes > 0) {
       engagementTrend = {
         value: 100,
         isPositive: true,
+        comparedRangeLabel,
       };
     }
 
