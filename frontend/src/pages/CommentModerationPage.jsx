@@ -23,6 +23,12 @@ const SENTIMENT_COLORS = {
   neutral: "bg-slate-100 text-slate-700",
 };
 
+const EMPTY_FILTERS = {
+  q: "",
+  email: "",
+  language: "",
+};
+
 export function CommentModerationPage() {
   const [aiComments, setAiComments] = useState([]);
   const [reportedComments, setReportedComments] = useState([]);
@@ -63,11 +69,21 @@ export function CommentModerationPage() {
   });
 
   const [translatedComments, setTranslatedComments] = useState({});
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [appliedFilters, setAppliedFilters] = useState(EMPTY_FILTERS);
 
   // Local error per comment (for retry failures)
   const [commentErrors, setCommentErrors] = useState({});
 
-  const loadAllData = async ({ silent = false } = {}) => {
+  const buildFilterParams = (source = appliedFilters) => {
+    const params = {};
+    if (source.q.trim()) params.q = source.q.trim();
+    if (source.email.trim()) params.email = source.email.trim();
+    if (source.language.trim()) params.language = source.language.trim();
+    return params;
+  };
+
+  const loadAllData = async ({ silent = false, filtersOverride } = {}) => {
     if (silent) {
       setRefreshing(true);
     } else {
@@ -75,10 +91,11 @@ export function CommentModerationPage() {
     }
     setError("");
     try {
+      const params = buildFilterParams(filtersOverride ?? appliedFilters);
       const [aiRes, reportedRes, appealsRes] = await Promise.all([
-        adminApi.getAIReviewComments(),
-        adminApi.getReportedComments(),
-        adminApi.getPendingAppeals(),
+        adminApi.getAIReviewComments(params),
+        adminApi.getReportedComments(params),
+        adminApi.getPendingAppeals(params),
       ]);
       setAiComments(aiRes.comments || []);
       setReportedComments(reportedRes.comments || []);
@@ -96,13 +113,28 @@ export function CommentModerationPage() {
   }, []);
 
   // Reload only the AI list (used after retry)
-  const reloadAIList = async () => {
+  const reloadAIList = async (filtersOverride = appliedFilters) => {
     try {
-      const aiRes = await adminApi.getAIReviewComments();
+      const aiRes = await adminApi.getAIReviewComments(
+        buildFilterParams(filtersOverride),
+      );
       setAiComments(aiRes.comments || []);
     } catch (err) {
       setError(getErrorMessage(err, "Failed to refresh AI comments"));
     }
+  };
+
+  const applyFilters = async (event) => {
+    event.preventDefault();
+    const nextFilters = { ...filters };
+    setAppliedFilters(nextFilters);
+    await loadAllData({ filtersOverride: nextFilters });
+  };
+
+  const clearFilters = async () => {
+    setFilters(EMPTY_FILTERS);
+    setAppliedFilters(EMPTY_FILTERS);
+    await loadAllData({ filtersOverride: EMPTY_FILTERS });
   };
 
   // Moderate comment (approve/delete)
@@ -559,6 +591,63 @@ export function CommentModerationPage() {
             {successMessage}
           </div>
         )}
+
+        <form
+          onSubmit={applyFilters}
+          className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+        >
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1.4fr)_minmax(220px,0.9fr)_180px_auto]">
+            <input
+              type="search"
+              value={filters.q}
+              onChange={(event) =>
+                setFilters((current) => ({ ...current, q: event.target.value }))
+              }
+              placeholder="Search comment content or email"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600"
+            />
+            <input
+              type="search"
+              value={filters.email}
+              onChange={(event) =>
+                setFilters((current) => ({ ...current, email: event.target.value }))
+              }
+              placeholder="Filter by user email"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600"
+            />
+            <select
+              value={filters.language}
+              onChange={(event) =>
+                setFilters((current) => ({
+                  ...current,
+                  language: event.target.value,
+                }))
+              }
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600"
+            >
+              <option value="">All languages</option>
+              <option value="en">English</option>
+              <option value="am">Amharic</option>
+              <option value="om">Oromo</option>
+              <option value="ti">Tigrinya</option>
+            </select>
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white hover:bg-teal-800"
+              >
+                Apply
+              </button>
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        </form>
 
         <div className="flex gap-2 border-b border-slate-200">
           <button

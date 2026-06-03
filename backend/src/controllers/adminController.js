@@ -25,6 +25,73 @@ const {
 } = require("../utils/responseHelper");
 const { normalizePhone, hashPhone } = require("../utils/helpers");
 const { simulateInboundSms } = require("../services/mockSmsService");
+
+const escapeRegex = (value = "") =>
+  String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const buildCommentSearchFilters = async (
+  { q, content, email, language },
+  { includeAppealReason = false, includeAppealAppellant = false } = {},
+) => {
+  const andFilters = [];
+  const contentValue = String(content || "").trim();
+  const emailValue = String(email || "").trim();
+  const languageValue = String(language || "").trim();
+  const queryValue = String(q || "").trim();
+
+  if (languageValue) {
+    andFilters.push({ language: languageValue });
+  }
+
+  if (contentValue) {
+    andFilters.push({ text: { $regex: escapeRegex(contentValue), $options: "i" } });
+  }
+
+  if (emailValue) {
+    const matchingUsers = await User.find(
+      { email: { $regex: escapeRegex(emailValue), $options: "i" } },
+      "_id",
+    ).lean();
+    const matchingUserIds = matchingUsers.map((user) => user._id);
+    const emailFilters = [{ userId: { $in: matchingUserIds } }];
+
+    if (includeAppealAppellant) {
+      emailFilters.push({ "appeal.appellantId": { $in: matchingUserIds } });
+    }
+
+    andFilters.push(
+      matchingUserIds.length ? { $or: emailFilters } : { _id: { $exists: false } },
+    );
+  }
+
+  if (queryValue) {
+    const matchingUsers = await User.find(
+      { email: { $regex: escapeRegex(queryValue), $options: "i" } },
+      "_id",
+    ).lean();
+    const matchingUserIds = matchingUsers.map((user) => user._id);
+    const queryFilters = [
+      { text: { $regex: escapeRegex(queryValue), $options: "i" } },
+    ];
+
+    if (matchingUserIds.length) {
+      queryFilters.push({ userId: { $in: matchingUserIds } });
+      if (includeAppealAppellant) {
+        queryFilters.push({ "appeal.appellantId": { $in: matchingUserIds } });
+      }
+    }
+
+    if (includeAppealReason) {
+      queryFilters.push({
+        "appeal.reason": { $regex: escapeRegex(queryValue), $options: "i" },
+      });
+    }
+
+    andFilters.push({ $or: queryFilters });
+  }
+
+  return andFilters;
+};
 // ========== PLANNER MANAGEMENT ==========
 
 // GET /admin/planners
@@ -775,6 +842,11 @@ exports.getPendingComments = async (req, res) => {
       filter.policyId = { $in: allowedPolicyIds };
     }
 
+    const searchFilters = await buildCommentSearchFilters(req.query);
+    if (searchFilters.length) {
+      filter.$and = [...(filter.$and || []), ...searchFilters];
+    }
+
     const comments = await Comment.find(filter)
       .populate("policyId", "title")
       .populate("userId", "email firstName lastName")
@@ -855,6 +927,11 @@ exports.getFlaggedComments = async (req, res) => {
         return sendSuccess(res, { comments: [] }, "No accessible policies");
       }
       filter.policyId = { $in: allowedPolicyIds };
+    }
+
+    const searchFilters = await buildCommentSearchFilters(req.query);
+    if (searchFilters.length) {
+      filter.$and = [...(filter.$and || []), ...searchFilters];
     }
 
     const comments = await Comment.find(filter)
@@ -1601,6 +1678,14 @@ exports.getAppeals = async (req, res) => {
       filter.policyId = { $in: allowedPolicyIds };
     }
 
+    const searchFilters = await buildCommentSearchFilters(req.query, {
+      includeAppealReason: true,
+      includeAppealAppellant: true,
+    });
+    if (searchFilters.length) {
+      filter.$and = [...(filter.$and || []), ...searchFilters];
+    }
+
     const comments = await Comment.find(filter)
       .populate("userId", "email firstName lastName")
       .populate("policyId", "title")
@@ -1614,6 +1699,7 @@ exports.getAppeals = async (req, res) => {
       commentId: c._id,
       text: c.text,
       policy: c.policyId?.title || "Unknown policy",
+      userId: c.userId,
       appeal: c.appeal,
       appellant: c.appeal?.appellantId,
       createdAt: c.createdAt,
