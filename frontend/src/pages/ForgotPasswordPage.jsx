@@ -195,26 +195,28 @@ export function ForgotPasswordPage() {
           <ErrorAlert message={error} />
 
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-            <label className="block">
-              <span className={`text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Email address</span>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                autoComplete="email"
-                disabled={submitting}
-                className={`mt-1 w-full rounded-lg border px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100 disabled:bg-slate-100 ${isDark ? 'border-white/10 bg-white/5 text-white placeholder:text-slate-500' : 'border-slate-300'}`}
-              />
-            </label>
+            <div className="flex flex-col gap-3 md:flex-row md:items-end">
+              <label className="block flex-1">
+                <span className={`text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Email address</span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  disabled={submitting}
+                  className={`mt-1 w-full rounded-lg border px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100 disabled:bg-slate-100 ${isDark ? 'border-white/10 bg-white/5 text-white placeholder:text-slate-500' : 'border-slate-300'}`}
+                />
+              </label>
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-teal-800 disabled:opacity-50"
-            >
-              {submitting ? "Sending..." : "Send reset link"}
-            </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-teal-800 disabled:opacity-50 md:w-auto md:min-w-48"
+              >
+                {submitting ? "Sending..." : "Send reset link"}
+              </button>
+            </div>
           </form>
 
           <div className={`mt-6 border-t ${isDark ? 'border-white/10' : 'border-slate-200'} pt-4 text-center`}>

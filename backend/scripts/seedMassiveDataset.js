@@ -897,7 +897,7 @@ const createPolicies = async ({ planners }) => {
           government: true,
         },
         citizenAnalyticsVisibility:
-          status === "closed" && publicClosedPolicyCount < PUBLIC_DASHBOARD_CLOSED_POLICY_COUNT
+          status === "closed"
             ? {
                 showResults: true,
                 showBreakdown: true,
