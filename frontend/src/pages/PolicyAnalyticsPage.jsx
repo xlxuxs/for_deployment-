@@ -6,6 +6,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   Legend,
   Line,
   LineChart,
@@ -47,6 +48,30 @@ const SENTIMENT_BADGE_CLASSES = {
 };
 
 const PAGE_SIZE = 10;
+
+const renderZeroAwareSentimentLabel = (props) => {
+  const { x, y, width, value } = props;
+  const numericValue = Number(value ?? 0);
+
+  if (Number.isNaN(numericValue) || x == null || y == null || width == null) {
+    return null;
+  }
+
+  const labelY =
+    numericValue === 0 ? y - 10 : numericValue > 0 ? y - 8 : y + 18;
+
+  return (
+    <text
+      x={x + width / 2}
+      y={labelY}
+      fill="#0f172a"
+      fontSize={12}
+      textAnchor="middle"
+    >
+      {numericValue.toFixed(2)}
+    </text>
+  );
+};
 
 const HelpTooltip = ({ text }) => (
   <span className="group relative ml-1 inline-block cursor-help">
@@ -1023,7 +1048,11 @@ export function PolicyAnalyticsPage() {
                           dataKey="value"
                           fill="#0f766e"
                           radius={[6, 6, 0, 0]}
-                        />
+                        >
+                          {demographicsMetric === "sentiment" ? (
+                            <LabelList content={renderZeroAwareSentimentLabel} />
+                          ) : null}
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (

@@ -1496,6 +1496,27 @@ const pickCommentersByLanguage = (
   return picked;
 };
 
+const getSentimentCommentCounts = (policyIndex, languageIndex) => {
+  const base = Math.max(COMMENTS_PER_LANGUAGE_SENTIMENT, 1);
+  const sentiments = ["positive", "neutral", "negative"];
+  const dominantSentiment = sentiments[policyIndex % sentiments.length];
+  const secondarySentiment =
+    sentiments[(policyIndex + 1) % sentiments.length];
+  const tertiarySentiment =
+    sentiments[(policyIndex + 2) % sentiments.length];
+  const counts = {
+    positive: base,
+    neutral: base,
+    negative: base,
+  };
+
+  counts[dominantSentiment] += 2 + ((policyIndex + languageIndex) % 2);
+  counts[secondarySentiment] += languageIndex % 2 === 0 ? 1 : 0;
+  counts[tertiarySentiment] += languageIndex % 3 === 0 ? 1 : 0;
+
+  return counts;
+};
+
 const createComments = async ({
   citizens,
   planners,
@@ -1517,12 +1538,17 @@ const createComments = async ({
     const usedIds = new Set();
     let commentOffset = 0;
 
-    for (const language of languages) {
-      for (const sentiment of ["positive", "neutral", "negative"]) {
+    languages.forEach((language, languageIndex) => {
+      const sentimentCounts = getSentimentCommentCounts(
+        policyIndex,
+        languageIndex,
+      );
+
+      ["positive", "neutral", "negative"].forEach((sentiment) => {
         const commenters = pickCommentersByLanguage(
           eligibleCitizens,
           language,
-          COMMENTS_PER_LANGUAGE_SENTIMENT,
+          sentimentCounts[sentiment],
           usedIds,
           policyIndex * 17 + commentOffset,
         );
@@ -1602,9 +1628,9 @@ const createComments = async ({
           });
         });
 
-        commentOffset += COMMENTS_PER_LANGUAGE_SENTIMENT;
-      }
-    }
+        commentOffset += sentimentCounts[sentiment];
+      });
+    });
 
     const moderator = moderators[policyIndex % moderators.length];
     const lowConfidenceUser = pickCommentersByLanguage(
