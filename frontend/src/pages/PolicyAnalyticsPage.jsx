@@ -40,6 +40,12 @@ const SENTIMENT_COLORS = {
   neutral: "#64748b",
 };
 
+const SENTIMENT_BADGE_CLASSES = {
+  positive: "bg-emerald-100 text-emerald-700",
+  negative: "bg-rose-100 text-rose-700",
+  neutral: "bg-slate-100 text-slate-700",
+};
+
 const PAGE_SIZE = 10;
 
 const HelpTooltip = ({ text }) => (
@@ -458,6 +464,8 @@ export function PolicyAnalyticsPage() {
   const heatmapData = heatmap?.data || [];
   const getHeatmapRegion = (row) =>
     row?.region || row?._id?.region || row?.regionName || "All regions";
+  const getHeatmapSentimentLabel = (row) =>
+    row?.dominantSentiment || "neutral";
   const getHeatmapMetric = (row) => {
     let value;
     if (analytics?.pollType === "binary") value = row.yesPercentage;
@@ -925,7 +933,16 @@ export function PolicyAnalyticsPage() {
                                   {metricValue?.toFixed(1)}%
                                 </td>
                                 <td className="px-3 py-2">
-                                  {item.averageSentiment?.toFixed(2)}
+                                  <span
+                                    className={[
+                                      "inline-flex rounded-full px-2.5 py-1 text-xs font-bold capitalize",
+                                      SENTIMENT_BADGE_CLASSES[
+                                        getHeatmapSentimentLabel(item)
+                                      ] || SENTIMENT_BADGE_CLASSES.neutral,
+                                    ].join(" ")}
+                                  >
+                                    {getHeatmapSentimentLabel(item)}
+                                  </span>
                                 </td>
                               </tr>
                             );

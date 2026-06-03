@@ -1088,11 +1088,39 @@ exports.exportAnalytics = async (req, res) => {
 
     const votes = await Vote.find(voteFilter).lean();
 
+    const escapeCsv = (value) => {
+      if (value === null || value === undefined) return "";
+      const stringValue = String(value);
+      if (
+        stringValue.includes(",") ||
+        stringValue.includes('"') ||
+        stringValue.includes("\n")
+      ) {
+        return `"${stringValue.replace(/"/g, '""')}"`;
+      }
+      return stringValue;
+    };
+
+    const choiceSummary =
+      policy.pollType === "likert"
+        ? (policy.likertLabels || []).join(" | ")
+        : (policy.pollOptions || [])
+            .map((option) => option.text || option.id)
+            .join(" | ");
+
     let csv =
+      "field,value\n" +
+      `Policy Title,${escapeCsv(policy.title)}\n` +
+      `Policy Description,${escapeCsv(policy.description)}\n` +
+      `Policy Code,${escapeCsv(policy.policyCode)}\n` +
+      `Poll Type,${escapeCsv(policy.pollType)}\n` +
+      `Target Regions,${escapeCsv((policy.targetRegions || []).join(" | "))}\n` +
+      `Choices,${escapeCsv(choiceSummary)}\n` +
+      "\n" +
       "voteId,channel,value,region,ageRange,gender,occupation,education,createdAt\n";
     votes.forEach((v) => {
       const valueStr = Array.isArray(v.value) ? v.value.join("|") : v.value;
-      csv += `${v._id},${v.channel},${valueStr},${v.region || ""},${v.demographics?.ageRange || ""},${v.demographics?.gender || ""},${v.demographics?.occupation || ""},${v.demographics?.education || ""},${v.createdAt.toISOString()}\n`;
+      csv += `${escapeCsv(v._id)},${escapeCsv(v.channel)},${escapeCsv(valueStr)},${escapeCsv(v.region || "")},${escapeCsv(v.demographics?.ageRange || "")},${escapeCsv(v.demographics?.gender || "")},${escapeCsv(v.demographics?.occupation || "")},${escapeCsv(v.demographics?.education || "")},${escapeCsv(v.createdAt.toISOString())}\n`;
     });
 
     res.setHeader("Content-Type", "text/csv");
@@ -1601,13 +1629,24 @@ exports.getHeatmap = async (req, res) => {
       const allKeywords = c.keywordsList.flat();
       let totalScore = 0;
       let count = 0;
+      const sentimentCounts = {
+        positive: 0,
+        negative: 0,
+        neutral: 0,
+      };
       for (const s of sentiments) {
         if (s === "positive") totalScore += 1;
         else if (s === "negative") totalScore -= 1;
         else totalScore += 0;
+        if (s && sentimentCounts[s] !== undefined) {
+          sentimentCounts[s] += 1;
+        }
         count++;
       }
       const avgSentiment = count ? (totalScore / count).toFixed(2) : 0;
+      const dominantSentiment = Object.entries(sentimentCounts).sort(
+        (left, right) => right[1] - left[1],
+      )[0]?.[0] || "neutral";
       const keywordFreq = {};
       for (const kw of allKeywords) {
         if (kw) keywordFreq[kw] = (keywordFreq[kw] || 0) + 1;
@@ -1618,6 +1657,8 @@ exports.getHeatmap = async (req, res) => {
         .map(([kw, freq]) => ({ keyword: kw, count: freq }));
       commentMap.set(key, {
         averageSentiment: parseFloat(avgSentiment),
+        dominantSentiment,
+        sentimentCounts,
         topKeywords,
       });
     }
@@ -1629,6 +1670,8 @@ exports.getHeatmap = async (req, res) => {
         const voteData = voteMap.get(key) || { totalVotes: 0 };
         const commentData = commentMap.get(key) || {
           averageSentiment: 0,
+          dominantSentiment: "neutral",
+          sentimentCounts: { positive: 0, negative: 0, neutral: 0 },
           topKeywords: [],
         };
         const [period, region] = byRegionFlag ? key.split("|") : [key, null];
@@ -1636,6 +1679,8 @@ exports.getHeatmap = async (req, res) => {
           period,
           ...voteData,
           averageSentiment: commentData.averageSentiment,
+          dominantSentiment: commentData.dominantSentiment,
+          sentimentCounts: commentData.sentimentCounts,
           topKeywords: commentData.topKeywords,
         };
         if (byRegionFlag && region) base.region = region;
