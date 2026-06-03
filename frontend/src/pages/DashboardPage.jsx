@@ -19,7 +19,6 @@ import {
   Line,
   LineChart,
   ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
   Area,
@@ -148,83 +147,103 @@ const StatCard = ({
 const TrendChart = ({ data }) => {
   const [hoverState, setHoverState] = useState(null);
 
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (!active || !payload?.length) return null;
-    return (
-      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xl">
-        <p className="text-sm font-semibold text-slate-900 mb-2">{label}</p>
-        {payload.map((entry, idx) => (
-          <div key={idx} className="flex items-center gap-2 text-sm">
-            <div className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
-            <span className="text-slate-600">{entry.name}:</span>
-            <span className="font-semibold text-slate-900">{formatNumber(entry.value)}</span>
-          </div>
-        ))}
-      </div>
-    );
-  };
+  const hoveredPoint =
+    hoverState?.index != null ? data?.[hoverState.index] || null : null;
 
   return (
-    <ResponsiveContainer width="100%" height={320}>
-      <AreaChart
-        data={data}
-        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-        onMouseMove={(state) => {
-          if (state?.activeLabel && state?.activePayload?.length) {
-            setHoverState({
-              label: state.activeLabel,
-              payload: state.activePayload,
-            });
-          }
-        }}
-        onMouseLeave={() => setHoverState(null)}
-      >
-        <CartesianGrid strokeDasharray="4 4" stroke="#e2e8f0" vertical={false} />
-        <XAxis 
-          dataKey="date" 
-          axisLine={false}
-          tickLine={false}
-          tick={{ fontSize: 12, fill: '#64748b' }}
-          interval="preserveStartEnd"
-        />
-        <YAxis 
-          axisLine={false}
-          tickLine={false}
-          tick={{ fontSize: 12, fill: '#64748b' }}
-          allowDecimals={false}
-        />
-        <Tooltip
-          isAnimationActive={false}
-          wrapperStyle={{ pointerEvents: "none" }}
-          active={Boolean(hoverState)}
-          label={hoverState?.label}
-          payload={hoverState?.payload || []}
-          content={<CustomTooltip />}
-        />
-        <Area
-          type="monotone"
-          dataKey="votes"
-          stroke="#0f766e"
-          strokeWidth={2.5}
-          fill="#0f766e"
-          name="Votes"
-          dot={false}
-          activeDot={{ r: 6, strokeWidth: 0 }}
-          isAnimationActive={false}
-        />
-        <Area
-          type="monotone"
-          dataKey="newUsers"
-          stroke="#2563eb"
-          strokeWidth={2.5}
-          fill="#2563eb"
-          name="New users"
-          dot={false}
-          activeDot={{ r: 6, strokeWidth: 0 }}
-          isAnimationActive={false}
-        />
-      </AreaChart>
-    </ResponsiveContainer>
+    <div className="relative h-80">
+      {hoveredPoint && hoverState ? (
+        <div
+          className="pointer-events-none absolute z-10 rounded-xl border border-slate-200 bg-white p-4 shadow-xl"
+          style={{
+            left: Math.max(12, hoverState.x + 12),
+            top: Math.max(12, hoverState.y - 24),
+          }}
+        >
+          <p className="mb-2 text-sm font-semibold text-slate-900">
+            {hoveredPoint.date}
+          </p>
+          <div className="flex items-center gap-2 text-sm">
+            <div
+              className="h-2 w-2 rounded-full"
+              style={{ backgroundColor: "#2563eb" }}
+            />
+            <span className="text-slate-600">New Users:</span>
+            <span className="font-semibold text-slate-900">
+              {formatNumber(hoveredPoint.newUsers)}
+            </span>
+          </div>
+          <div className="mt-1 flex items-center gap-2 text-sm">
+            <div
+              className="h-2 w-2 rounded-full"
+              style={{ backgroundColor: "#0f766e" }}
+            />
+            <span className="text-slate-600">Votes:</span>
+            <span className="font-semibold text-slate-900">
+              {formatNumber(hoveredPoint.votes)}
+            </span>
+          </div>
+        </div>
+      ) : null}
+
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart
+          data={data}
+          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+          onMouseMove={(state) => {
+            if (
+              state?.isTooltipActive &&
+              typeof state.activeTooltipIndex === "number" &&
+              state?.activeCoordinate
+            ) {
+              setHoverState({
+                index: state.activeTooltipIndex,
+                x: state.activeCoordinate.x,
+                y: state.activeCoordinate.y,
+              });
+            }
+          }}
+          onMouseLeave={() => setHoverState(null)}
+        >
+          <CartesianGrid strokeDasharray="4 4" stroke="#e2e8f0" vertical={false} />
+          <XAxis
+            dataKey="date"
+            axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 12, fill: "#64748b" }}
+            interval="preserveStartEnd"
+          />
+          <YAxis
+            axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 12, fill: "#64748b" }}
+            allowDecimals={false}
+          />
+          <Area
+            type="monotone"
+            dataKey="votes"
+            stroke="#0f766e"
+            strokeWidth={2.5}
+            fill="#0f766e"
+            name="Votes"
+            dot={false}
+            activeDot={{ r: 6, strokeWidth: 0 }}
+            isAnimationActive={false}
+          />
+          <Area
+            type="monotone"
+            dataKey="newUsers"
+            stroke="#2563eb"
+            strokeWidth={2.5}
+            fill="#2563eb"
+            name="New users"
+            dot={false}
+            activeDot={{ r: 6, strokeWidth: 0 }}
+            isAnimationActive={false}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 
