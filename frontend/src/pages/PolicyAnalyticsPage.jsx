@@ -563,6 +563,10 @@ export function PolicyAnalyticsPage() {
     .map((item) => ({
       name: item[dimension] || "unknown",
       value: getDemographicMetric(item),
+      renderValue:
+        demographicsMetric === "sentiment" && getDemographicMetric(item) === 0
+          ? 0.0001
+          : getDemographicMetric(item),
       totalComments: item.totalComments || 0,
     }))
     .filter((item) =>
@@ -1038,17 +1042,41 @@ export function PolicyAnalyticsPage() {
                           }
                         />
                         <RechartsTooltip
-                          formatter={(value) =>
-                            demographicsMetric === "sentiment"
-                              ? [Number(value).toFixed(2), "Average sentiment"]
-                              : [value, "Value"]
-                          }
+                          formatter={(value, name, item) => {
+                            if (demographicsMetric === "sentiment") {
+                              return [
+                                Number(item?.payload?.value ?? value).toFixed(2),
+                                "Average sentiment",
+                              ];
+                            }
+                            return [value, "Value"];
+                          }}
                         />
                         <Bar
-                          dataKey="value"
-                          fill="#0f766e"
+                          dataKey={
+                            demographicsMetric === "sentiment"
+                              ? "renderValue"
+                              : "value"
+                          }
+                          minPointSize={
+                            demographicsMetric === "sentiment" ? 6 : 0
+                          }
                           radius={[6, 6, 0, 0]}
                         >
+                          {demographicChartData.map((entry) => (
+                            <Cell
+                              key={`${entry.name}-${entry.value}`}
+                              fill={
+                                demographicsMetric === "sentiment"
+                                  ? entry.value < 0
+                                    ? "#dc2626"
+                                    : entry.value === 0
+                                      ? "#94a3b8"
+                                      : "#0f766e"
+                                  : "#0f766e"
+                              }
+                            />
+                          ))}
                           {demographicsMetric === "sentiment" ? (
                             <LabelList content={renderZeroAwareSentimentLabel} />
                           ) : null}

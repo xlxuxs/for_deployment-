@@ -152,6 +152,47 @@ export function PolicyDetailPage() {
     return createdBy.email || null;
   };
 
+  const renderPollChoices = () => {
+    if (!policy) return null;
+
+    if (policy.pollType === "binary") {
+      return "Yes, No";
+    }
+
+    if (policy.pollType === "rating") {
+      return "1 star, 2 stars, 3 stars, 4 stars, 5 stars";
+    }
+
+    if (policy.pollType === "likert") {
+      return (policy.likertLabels || [])
+        .map((label, index) => `${index + 1}. ${label}`)
+        .join(", ");
+    }
+
+    if (policy.pollType === "multipleChoice") {
+      const optionList = (policy.pollOptions || []).map((option) => option.text);
+      const selectionNote =
+        policy.maxSelections > 1
+          ? ` Select up to ${policy.maxSelections}.`
+          : "";
+      return `${optionList.join(", ")}${selectionNote}`.trim();
+    }
+
+    if (policy.pollType === "approval") {
+      return (policy.pollOptions || []).map((option) => option.text).join(", ");
+    }
+
+    if (policy.pollType === "rankedChoice") {
+      const optionList = (policy.pollOptions || []).map((option) => option.text);
+      const rankNote = policy.rankedChoiceMaxRank
+        ? ` Rank up to ${policy.rankedChoiceMaxRank}.`
+        : "";
+      return `${optionList.join(", ")}${rankNote}`.trim();
+    }
+
+    return "No choices configured";
+  };
+
   const setTranslatedComment = (commentId, translatedText) => {
     setTranslatedComments((current) => ({
       ...current,
@@ -239,12 +280,26 @@ export function PolicyDetailPage() {
         const commentsList = (rawComments || []).map(normalizeComment);
         setAllComments(commentsList || []);
         setPendingComments(
-          (commentsList || []).filter((c) => c.aiStatus === "pending"),
+          (commentsList || []).filter(
+            (c) =>
+              c.reviewFlags?.sentimentReviewNeeded ||
+              c.reviewFlags?.moderationReviewNeeded ||
+              c.aiStatus === "pending",
+          ),
         );
         setReportedComments(
-          (commentsList || []).filter((c) => (c.reportCount || 0) > 0),
+          (commentsList || []).filter(
+            (c) =>
+              (c.reportCount || 0) > 0 ||
+              ["reported", "under_review", "actioned"].includes(c.reportState) ||
+              c.visibility === "hidden",
+          ),
         );
-        setAppeals((commentsList || []).filter((c) => c.appeal));
+        setAppeals(
+          (commentsList || []).filter(
+            (c) => c.appeal && c.appeal.status === "pending",
+          ),
+        );
       } catch (e) {
         setAllComments([]);
         setPendingComments([]);
@@ -502,6 +557,9 @@ export function PolicyDetailPage() {
             <dt className="font-semibold">{t("Poll Type:")}</dt>
             <dd>{t(policy.pollType || "multipleChoice")}</dd>
 
+            <dt className="font-semibold">{t("Choices:")}</dt>
+            <dd>{renderPollChoices()}</dd>
+
             <dt className="font-semibold">{t("Topics:")}</dt>
             <dd>{(policy.topics || []).map((topic) => t(topic)).join(", ") || t("Tourism")}</dd>
 
@@ -693,6 +751,8 @@ export function PolicyDetailPage() {
               <dd>{formatDate(policy.endDate)}</dd>
               <dt className="font-semibold">Poll Type:</dt>
               <dd>{policy.pollType}</dd>
+              <dt className="font-semibold">Choices:</dt>
+              <dd>{renderPollChoices()}</dd>
               <dt className="font-semibold">Topics:</dt>
               <dd>{policy.topics?.join(", ") || "None"}</dd>
               <dt className="font-semibold">Sentiment Counts:</dt>

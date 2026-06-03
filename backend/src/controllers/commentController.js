@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Comment = require("../models/Comment");
 const Policy = require("../models/Policy");
+const User = require("../models/User");
 const logger = require("../utils/logger");
 const {
   sendSuccess,
@@ -460,11 +461,17 @@ exports.getPolicyComments = async (req, res) => {
       visibility: c.visibility,
       reportState: c.reportState,
       reportCount: c.reportCount,
+      reports: c.reports,
+      appeal: c.appeal,
       sentiment: c.sentiment,
       keywords: c.keywords,
       replyCount: c.replyCount,
       isOfficialReply: c.isOfficialReply,
       aiStatus: c.aiStatus,
+      reviewFlags: c.reviewFlags,
+      region: c.region,
+      demographics: c.demographics,
+      language: c.language,
       editedAt: c.editedAt,
       editCount: c.editCount,
       createdAt: c.createdAt,
