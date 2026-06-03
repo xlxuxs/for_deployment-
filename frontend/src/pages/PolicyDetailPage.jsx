@@ -448,13 +448,15 @@ export function PolicyDetailPage() {
     <div className="space-y-3">
       {comments.map((c) => {
         const commentId = c._id || c.id;
-        const text = c.text || c.comment;
+        const text = getCommentText(c);
         const userDisplayName = c.userId?.displayName || c.userDisplayName || "Anonymous";
         const createdAt = c.createdAt;
         const sentimentLabel = typeof c.sentiment === "string" ? c.sentiment : c.sentiment?.label || null;
         return (
           <div key={commentId} className="rounded-lg border p-3">
-            <p className="text-sm font-semibold">{text}</p>
+            <p data-i18n-skip="true" className="text-sm font-semibold">
+              {translatedComments[commentId] || text}
+            </p>
             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
               <span>{userDisplayName}</span>
               <span>•</span>
@@ -463,6 +465,23 @@ export function PolicyDetailPage() {
                 <span className="rounded-full bg-slate-100 px-2 py-0.5">Sentiment: {sentimentLabel}</span>
               )}
               {c.reportCount !== undefined && <span className="text-rose-600">Reports: {c.reportCount}</span>}
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <LanguageSelector
+                text={text}
+                onTranslated={(translatedText) =>
+                  setTranslatedComment(commentId, translatedText)
+                }
+              />
+              {translatedComments[commentId] && (
+                <button
+                  type="button"
+                  onClick={() => revertTranslatedComment(commentId)}
+                  className="rounded-lg border border-slate-200 px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                >
+                  Show original
+                </button>
+              )}
             </div>
             <div className="mt-2 flex flex-wrap gap-1">
               {actions.map((act) => (

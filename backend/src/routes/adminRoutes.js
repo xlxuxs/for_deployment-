@@ -100,7 +100,7 @@ router.delete(
 // ==================== REPORT MANAGEMENT ====================
 router.get(
   "/comments/:commentId/reports",
-  auth(["comment_moderator", "admin"]),
+  auth(["planner", "comment_moderator", "admin"]),
   validateObjectId("commentId"),
   adminController.getCommentReports,
 );

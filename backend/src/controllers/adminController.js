@@ -1493,6 +1493,41 @@ exports.getCommentReports = async (req, res) => {
         404,
       );
 
+    const user = req.user;
+    const isAdmin = user.role === "admin";
+    const isCommentModerator = user.role === "comment_moderator";
+
+    if (!isAdmin && !isCommentModerator) {
+      const policy = await Policy.findById(comment.policyId).select("createdBy");
+      if (!policy) {
+        return sendError(
+          res,
+          ErrorCodes.NOT_FOUND,
+          "Policy not found",
+          null,
+          404,
+        );
+      }
+
+      const isOwner = policy.createdBy.toString() === user.id.toString();
+      const isAssociate = await PolicyAssociate.findOne({
+        policyId: comment.policyId,
+        plannerId: user.id,
+        invitationStatus: "accepted",
+        permissions: { $in: ["moderate_comments"] },
+      });
+
+      if (!isOwner && !isAssociate) {
+        return sendError(
+          res,
+          ErrorCodes.FORBIDDEN,
+          "You do not have permission to view reports for this policy",
+          null,
+          403,
+        );
+      }
+    }
+
     const reports = comment.reports.map((report) => ({
       id: report._id,
       reason: report.reason,
