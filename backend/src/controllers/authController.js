@@ -8,6 +8,7 @@ const { sendOtpEmail, sendPasswordResetEmail } = require("../utils/email");
 const {
   hashPassword,
   comparePassword,
+  validatePasswordStrength,
   hashPhone,
   generateOTP,
   normalizePhone,
@@ -86,12 +87,12 @@ exports.register = async (req, res) => {
       );
     }
 
-    // Password strength
-    if (password.length < 8) {
+    const passwordValidationError = validatePasswordStrength(password);
+    if (passwordValidationError) {
       return sendError(
         res,
         ErrorCodes.VALIDATION,
-        "Password must be at least 8 characters long",
+        passwordValidationError,
         null,
         400,
       );
@@ -573,11 +574,12 @@ exports.resetPassword = async (req, res) => {
       );
     }
 
-    if (newPassword.length < 8) {
+    const passwordValidationError = validatePasswordStrength(newPassword);
+    if (passwordValidationError) {
       return sendError(
         res,
         ErrorCodes.VALIDATION,
-        "Password must be at least 8 characters long",
+        passwordValidationError,
         null,
         400,
       );

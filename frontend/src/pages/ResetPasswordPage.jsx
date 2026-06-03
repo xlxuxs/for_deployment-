@@ -5,6 +5,9 @@ import { authApi } from "../api/auth";
 import { ErrorAlert } from "../components/ErrorAlert";
 import { PasswordField } from "../components/PasswordField";
 
+const PASSWORD_REQUIREMENTS_MESSAGE =
+  "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.";
+
 export function ResetPasswordPage() {
   const { isAuthenticated, initializing } = useAuth();
   const [searchParams] = useSearchParams();
@@ -69,8 +72,14 @@ export function ResetPasswordPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+    if (
+      password.length < 8 ||
+      !/[A-Z]/.test(password) ||
+      !/[a-z]/.test(password) ||
+      !/\d/.test(password) ||
+      !/[^A-Za-z0-9]/.test(password)
+    ) {
+      setError(PASSWORD_REQUIREMENTS_MESSAGE);
       return;
     }
 
@@ -148,7 +157,7 @@ export function ResetPasswordPage() {
           <div className="mb-8">
             <span className="grid h-12 w-12 place-items-center rounded-lg bg-teal-700 text-sm font-black text-white">CP</span>
             <h2 className="mt-5 text-2xl font-bold text-slate-950">New password</h2>
-            <p className="mt-1 text-sm text-slate-600">Create a strong password.</p>
+            <p className="mt-1 text-sm text-slate-600">{PASSWORD_REQUIREMENTS_MESSAGE}</p>
           </div>
 
           <ErrorAlert message={error} />
@@ -161,7 +170,7 @@ export function ResetPasswordPage() {
               placeholder="••••••••"
               autoComplete="new-password"
               disabled={submitting}
-              helperText="Minimum 6 characters"
+              helperText={PASSWORD_REQUIREMENTS_MESSAGE}
             />
 
             <PasswordField

@@ -10,9 +10,15 @@ import { getErrorMessage } from "../lib/format";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 
+const PASSWORD_REQUIREMENTS_MESSAGE =
+  "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.";
+
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
-  newPassword: z.string().min(8, "New password must be at least 8 characters").regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"),
+  newPassword: z
+    .string()
+    .min(8, PASSWORD_REQUIREMENTS_MESSAGE)
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/, PASSWORD_REQUIREMENTS_MESSAGE),
   confirmPassword: z.string().min(1, "Confirm password is required"),
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: "Passwords do not match",
@@ -139,7 +145,7 @@ export function SettingsPage() {
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <h3 className="text-lg font-bold text-slate-950">Password</h3>
           <p className="mt-1 text-sm text-slate-500">
-            Update your login credentials securely.
+            Update your login credentials securely. {PASSWORD_REQUIREMENTS_MESSAGE}
           </p>
           <form className="mt-4 space-y-3" onSubmit={handleSubmit(onPasswordSubmit)}>
             <PasswordField

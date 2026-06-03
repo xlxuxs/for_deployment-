@@ -8,6 +8,7 @@ const client = require("../config/redis");
 const {
   hashPassword,
   comparePassword,
+  validatePasswordStrength,
   generateOTP,
   hashPhone,
 } = require("../utils/helpers");
@@ -122,6 +123,28 @@ exports.changePassword = async (req, res) => {
         "Current password is incorrect",
         null,
         401,
+      );
+    }
+
+    const passwordValidationError = validatePasswordStrength(newPassword);
+    if (passwordValidationError) {
+      return sendError(
+        res,
+        ErrorCodes.VALIDATION,
+        passwordValidationError,
+        null,
+        400,
+      );
+    }
+
+    const isSame = await comparePassword(newPassword, user.passwordHash);
+    if (isSame) {
+      return sendError(
+        res,
+        ErrorCodes.VALIDATION,
+        "New password must be different from your current password.",
+        null,
+        400,
       );
     }
 

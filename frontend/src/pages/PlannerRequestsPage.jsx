@@ -388,7 +388,7 @@ export function PlannerRequestsPage() {
                       <div className="space-y-4">
                         <div className="planner-request-summary rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/60">
                           <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t("Request summary")}</p>
-                          <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-200">{request.reason}</p>
+                          <p className="mt-3 break-words text-sm leading-7 text-slate-700 dark:text-slate-200">{request.reason}</p>
                         </div>
 
                         {request.proofFile ? (
@@ -500,7 +500,7 @@ export function PlannerRequestsPage() {
                         <div className="space-y-4">
                           <div className="planner-request-summary rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/60">
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t("Request summary")}</p>
-                            <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-200">{request.reason}</p>
+                            <p className="mt-3 break-words text-sm leading-7 text-slate-700 dark:text-slate-200">{request.reason}</p>
                           </div>
 
                           {request.rejectionReason ? (
