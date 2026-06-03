@@ -146,6 +146,8 @@ const StatCard = ({
 };
 
 const TrendChart = ({ data }) => {
+  const [hoverState, setHoverState] = useState(null);
+
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
     return (
@@ -164,7 +166,19 @@ const TrendChart = ({ data }) => {
 
   return (
     <ResponsiveContainer width="100%" height={320}>
-      <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+      <AreaChart
+        data={data}
+        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+        onMouseMove={(state) => {
+          if (state?.activeLabel && state?.activePayload?.length) {
+            setHoverState({
+              label: state.activeLabel,
+              payload: state.activePayload,
+            });
+          }
+        }}
+        onMouseLeave={() => setHoverState(null)}
+      >
         <CartesianGrid strokeDasharray="4 4" stroke="#e2e8f0" vertical={false} />
         <XAxis 
           dataKey="date" 
@@ -179,7 +193,14 @@ const TrendChart = ({ data }) => {
           tick={{ fontSize: 12, fill: '#64748b' }}
           allowDecimals={false}
         />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip
+          isAnimationActive={false}
+          wrapperStyle={{ pointerEvents: "none" }}
+          active={Boolean(hoverState)}
+          label={hoverState?.label}
+          payload={hoverState?.payload || []}
+          content={<CustomTooltip />}
+        />
         <Area
           type="monotone"
           dataKey="votes"
@@ -189,6 +210,7 @@ const TrendChart = ({ data }) => {
           name="Votes"
           dot={false}
           activeDot={{ r: 6, strokeWidth: 0 }}
+          isAnimationActive={false}
         />
         <Area
           type="monotone"
@@ -199,6 +221,7 @@ const TrendChart = ({ data }) => {
           name="New users"
           dot={false}
           activeDot={{ r: 6, strokeWidth: 0 }}
+          isAnimationActive={false}
         />
       </AreaChart>
     </ResponsiveContainer>
