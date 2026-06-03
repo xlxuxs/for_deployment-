@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Vote = require("../models/Vote");
 const Policy = require("../models/Policy");
 const User = require("../models/User");
@@ -157,38 +158,52 @@ exports.submitAppVote = async (req, res) => {
       await commentDoc.save();
     }
 
-    await recordVote(policyId, normalizedValue);
+    try {
+      await recordVote(policyId, normalizedValue);
 
-    const ownerId = policy.createdBy.toString();
-    const associates = await PolicyAssociate.find({
-      policyId,
-      revokedAt: null,
-      permissions: "view_analytics",
-    }).select("plannerId");
-    const associateIds = associates.map((a) => a.plannerId.toString());
-
-    await checkForAnomalies(
-      policyId,
-      normalizedValue,
-      policy.title,
-      ownerId,
-      associateIds,
-    );
-
-    await createAuditLog({
-      userId: user._id,
-      userRole: user.role,
-      action: "SUBMIT_VOTE",
-      targetType: "Vote",
-      targetId: vote._id,
-      details: {
+      const ownerId = policy.createdBy.toString();
+      const associates = await PolicyAssociate.find({
         policyId,
-        pollType: policy.pollType,
-        value: normalizedValue,
-        hasComment: !!commentDoc,
-      },
-      req,
-    });
+        revokedAt: null,
+        permissions: "view_analytics",
+      }).select("plannerId");
+      const associateIds = associates.map((a) => a.plannerId.toString());
+
+      await checkForAnomalies(
+        policyId,
+        normalizedValue,
+        policy.title,
+        ownerId,
+        associateIds,
+      );
+    } catch (sideEffectError) {
+      logger.warn(
+        { error: sideEffectError.message, stack: sideEffectError.stack, policyId, voteId: vote._id },
+        "Vote analytics side effects failed",
+      );
+    }
+
+    try {
+      await createAuditLog({
+        userId: user._id,
+        userRole: user.role,
+        action: "SUBMIT_VOTE",
+        targetType: "Vote",
+        targetId: vote._id,
+        details: {
+          policyId,
+          pollType: policy.pollType,
+          value: normalizedValue,
+          hasComment: !!commentDoc,
+        },
+        req,
+      });
+    } catch (auditError) {
+      logger.warn(
+        { error: auditError.message, stack: auditError.stack, voteId: vote._id },
+        "Vote audit log failed",
+      );
+    }
 
     logger.info(
       `User ${user._id} voted on policy ${policyId} (${policy.pollType})`,
