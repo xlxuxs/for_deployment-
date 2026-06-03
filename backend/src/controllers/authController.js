@@ -18,6 +18,7 @@ const {
   sendError,
   ErrorCodes,
 } = require("../utils/responseHelper");
+const { verifyCaptcha } = require("../utils/captcha");
 
 // ==================== REGISTRATION & OTP ====================
 
@@ -358,7 +359,13 @@ exports.verifyOtp = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, captchaToken } = req.body;
+
+    const isValidCaptcha = await verifyCaptcha(captchaToken);
+    if (!isValidCaptcha) {
+      return res.status(400).json({ message: "CAPTCHA verification failed" });
+    }
+
     if (!email || !password) {
       return sendError(
         res,

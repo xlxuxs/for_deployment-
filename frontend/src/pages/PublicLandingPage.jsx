@@ -15,6 +15,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { plannerApi } from "../api/planners";
 import { publicApi } from "../api/public";
+import ReCAPTCHA from "react-google-recaptcha";
 import { ErrorAlert } from "../components/ErrorAlert";
 import { LocaleSwitcher } from "../components/LocaleSwitcher";
 import { LoadingState } from "../components/LoadingState";
@@ -173,6 +174,7 @@ export function PublicLandingPage() {
   const [form, setForm] = useState(initialForm);
   const [theme, setTheme] = useState(getInitialTheme);
   const proofFileRef = useRef(null);
+  const recaptchaRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -343,18 +345,14 @@ export function PublicLandingPage() {
       return;
     }
 
+    const captchaToken = recaptchaRef.current?.getValue();
+    if (!captchaToken) {
+      setError(t("Please verify that you are not a robot."));
+      return;
+    }
+
     setSubmitting(true);
     try {
-      // If reCAPTCHA v3 is available, execute and attach token
-      const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
-      let captchaToken = null;
-      if (siteKey && window.grecaptcha && typeof window.grecaptcha.execute === "function") {
-        try {
-          captchaToken = await window.grecaptcha.execute(siteKey, { action: "planner_request" });
-        } catch (err) {
-          console.warn("grecaptcha execute failed", err);
-        }
-      }
       const formData = new FormData();
       formData.append("applicantType", "nonCitizen");
       formData.append("fullName", form.fullName.trim());
@@ -370,15 +368,17 @@ export function PublicLandingPage() {
       formData.append("organization", form.organization.trim());
       formData.append("reason", form.reason.trim());
       formData.append("proofFile", form.proofFile);
-      if (captchaToken) formData.append("captchaToken", captchaToken);
+      formData.append("captchaToken", captchaToken);
 
       await plannerApi.requestPlannerPublic(formData);
       setForm(initialForm);
       if (proofFileRef.current) {
         proofFileRef.current.value = "";
       }
+      recaptchaRef.current?.reset();
       showToast("success", t("Planner request submitted."));
     } catch (err) {
+      recaptchaRef.current?.reset();
       setError(getErrorMessage(err, "Failed to submit planner request"));
     } finally {
       setSubmitting(false);
@@ -989,6 +989,14 @@ export function PublicLandingPage() {
                         className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100 ${isDark ? "border-slate-700 bg-slate-900 text-white placeholder:text-slate-500" : "border-slate-300 bg-white text-slate-950"}`}
                         placeholder={t("Reason")}
                       />
+
+                      <div className="recaptcha-container flex justify-center py-2">
+                        <ReCAPTCHA
+                          ref={recaptchaRef}
+                          sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                          theme={isDark ? "dark" : "light"}
+                        />
+                      </div>
 
                       <div className={`flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between ${isDark ? "border-slate-800" : "border-slate-200"}`}>
                         <p className={`text-xs leading-6 ${isDark ? "text-slate-400" : "text-slate-500"}`}>

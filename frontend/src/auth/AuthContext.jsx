@@ -59,8 +59,8 @@ export function AuthProvider({ children }) {
     refreshUser();
   }, [isPublicRoute, refreshUser, location.pathname]);
 
-  const login = useCallback(async (email, password) => {
-    const result = await authApi.login(email, password);
+  const login = useCallback(async (email, password, captchaToken) => {
+    const result = await authApi.login(email, password, captchaToken);
 
     if (!DASHBOARD_ROLES.includes(result.role)) {
       clearStoredAuth();

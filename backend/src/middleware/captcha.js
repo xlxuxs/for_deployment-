@@ -24,17 +24,6 @@ const verifyCaptcha = async (token) => {
 };
 
 const captchaMiddleware = async (req, res, next) => {
-  // If CAPTCHA is disabled (development), skip verification
-  if (process.env.DISABLE_CAPTCHA === "true") {
-    console.warn("CAPTCHA disabled – skipping verification");
-    return next();
-  }
-  // Skip if CAPTCHA not configured (no secret key)
-  if (!process.env.RECAPTCHA_SECRET_KEY) {
-    console.warn("CAPTCHA secret key missing – skipping verification");
-    return next();
-  }
-
   const token = req.body?.captchaToken || req.query?.captchaToken || req.headers["x-captcha-token"];
   const expectedAction = req.body?.captchaAction || req.query?.captchaAction || null;
 

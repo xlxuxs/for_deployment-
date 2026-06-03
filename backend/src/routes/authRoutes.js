@@ -12,7 +12,7 @@ router.post(
 );
 router.post("/send-otp", limiters.otpRequest, authController.sendOtp);
 router.post("/verify-otp", limiters.otpVerify, authController.verifyOtp);
-router.post("/login", captchaMiddleware, limiters.auth, authController.login);
+router.post("/login", limiters.auth, authController.login);
 router.post(
   "/forgot-password",
   captchaMiddleware,

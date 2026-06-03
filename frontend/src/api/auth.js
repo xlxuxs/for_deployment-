@@ -1,8 +1,8 @@
 import { apiClient } from "./client";
 
 export const authApi = {
-  login(email, password) {
-    return apiClient.post("/auth/login", { email, password });
+  login(email, password, captchaToken) {
+    return apiClient.post("/auth/login", { email, password, captchaToken });
   },
   register(email, password, phone, region) {
     return apiClient.post("/auth/register", { email, password, phone, region });

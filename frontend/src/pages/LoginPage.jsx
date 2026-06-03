@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Navigate, useLocation, useNavigate, Link } from "react-router-dom";
 import { ArrowRight, Moon, Sparkles, Sun } from "lucide-react";
 import { z } from "zod";
+import ReCAPTCHA from "react-google-recaptcha";
 import { useAuth } from "../auth/AuthContext";
 import { plannerApi } from "../api/planners";
 import { LocaleSwitcher } from "../components/LocaleSwitcher";
@@ -45,6 +46,7 @@ export function LoginPage() {
   const [appealReason, setAppealReason] = useState("");
   const [appealNotice, setAppealNotice] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const recaptchaRef = useRef(null);
   const {
     register,
     handleSubmit,
@@ -74,6 +76,13 @@ export function LoginPage() {
     setServerError("");
     setDisabledAccount(false);
     setAppealNotice("");
+
+    const captchaToken = recaptchaRef.current?.getValue();
+    if (!captchaToken) {
+      setServerError(t("Please verify that you are not a robot."));
+      return;
+    }
+
     const parsed = loginSchema.safeParse(values);
     if (!parsed.success) {
       parsed.error.issues.forEach((issue) => {
@@ -84,10 +93,11 @@ export function LoginPage() {
 
     try {
       setSubmitting(true);
-      await login(parsed.data.email, parsed.data.password);
+      await login(parsed.data.email, parsed.data.password, captchaToken);
       const destination = location.state?.from?.pathname || "/dashboard";
       navigate(destination, { replace: true });
     } catch (error) {
+      recaptchaRef.current?.reset();
       if (error.code === "ACCOUNT_DISABLED") {
         setDisabledAccount(true);
       }
@@ -260,6 +270,14 @@ export function LoginPage() {
                     >
                       {t("Forgot password?")}
                     </Link>
+                  </div>
+
+                  <div className="recaptcha-container flex justify-center py-2">
+                    <ReCAPTCHA
+                      ref={recaptchaRef}
+                      sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                      theme={isDark ? "dark" : "light"}
+                    />
                   </div>
 
                   <button

@@ -15,6 +15,8 @@ const {
   ErrorCodes,
 } = require("../utils/responseHelper");
 const { sendEmail, sendPlannerPasswordSetupEmail } = require("../utils/email");
+const { verifyCaptcha } = require("../utils/captcha");
+
 
 const escapeHtml = (value = "") =>
   String(value)
@@ -207,7 +209,13 @@ exports.requestPlanner = async (req, res) => {
       education,
       preferredLanguage,
       languagesSpoken,
+      captchaToken,
     } = req.body;
+
+    const isValidCaptcha = await verifyCaptcha(captchaToken);
+    if (!isValidCaptcha) {
+      return res.status(400).json({ message: "CAPTCHA verification failed" });
+    }
 
     if (!req.file) {
       return sendError(
