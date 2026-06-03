@@ -782,6 +782,7 @@ export function PolicyAnalyticsPage() {
                               <YAxis allowDecimals={false} />
                               <RechartsTooltip
                                 isAnimationActive={false}
+                                shared={false}
                                 wrapperStyle={{ pointerEvents: "none" }}
                               />
                               <Bar
@@ -876,6 +877,7 @@ export function PolicyAnalyticsPage() {
                               <YAxis allowDecimals={false} />
                               <RechartsTooltip
                                 isAnimationActive={false}
+                                shared={false}
                                 wrapperStyle={{ pointerEvents: "none" }}
                               />
                               <Bar
@@ -1124,6 +1126,7 @@ export function PolicyAnalyticsPage() {
                         />
                         <RechartsTooltip
                           isAnimationActive={false}
+                          shared={false}
                           wrapperStyle={{ pointerEvents: "none" }}
                           formatter={(value, name, item) => {
                             if (demographicsMetric === "sentiment") {

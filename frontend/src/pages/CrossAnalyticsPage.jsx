@@ -253,6 +253,7 @@ export function CrossAnalyticsPage() {
                   <YAxis allowDecimals={false} />
                   <Tooltip
                     isAnimationActive={false}
+                    shared={false}
                     wrapperStyle={{ pointerEvents: "none" }}
                   />
                   <Bar
