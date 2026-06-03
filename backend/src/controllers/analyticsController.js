@@ -1537,16 +1537,46 @@ exports.getHeatmap = async (req, res) => {
     if (ageRange) commentMatch["demographics.ageRange"] = ageRange;
     if (occupation) commentMatch["demographics.occupation"] = occupation;
     if (education) commentMatch["demographics.education"] = education;
-    if (byRegionFlag && regions) {
-      const regionList = regions.split(",").map((r) => r.trim());
-      commentMatch.region = { $in: regionList };
+    const commentPipeline = [{ $match: commentMatch }];
+
+    if (byRegionFlag) {
+      commentPipeline.push(
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "commenter",
+          },
+        },
+        {
+          $unwind: {
+            path: "$commenter",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $addFields: {
+            resolvedRegion: {
+              $ifNull: ["$region", "$commenter.region"],
+            },
+          },
+        },
+      );
+
+      if (regions) {
+        const regionList = regions.split(",").map((r) => r.trim());
+        commentPipeline.push({
+          $match: { resolvedRegion: { $in: regionList } },
+        });
+      }
     }
 
     let commentGroupId;
     if (byRegionFlag) {
       commentGroupId = {
         period: { $dateToString: { format: dateFormat, date: "$createdAt" } },
-        region: "$region",
+        region: "$resolvedRegion",
       };
     } else {
       commentGroupId = {
@@ -1554,8 +1584,7 @@ exports.getHeatmap = async (req, res) => {
       };
     }
 
-    const commentPipeline = [
-      { $match: commentMatch },
+    commentPipeline.push(
       {
         $group: {
           _id: commentGroupId,
@@ -1563,7 +1592,7 @@ exports.getHeatmap = async (req, res) => {
           keywordsList: { $push: "$keywords" },
         },
       },
-    ];
+    );
     const commentResults = await Comment.aggregate(commentPipeline);
     const commentMap = new Map();
     for (const c of commentResults) {

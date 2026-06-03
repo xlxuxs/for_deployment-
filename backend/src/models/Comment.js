@@ -156,6 +156,7 @@ const CommentSchema = new mongoose.Schema(
         ],
       },
     },
+    region: { type: String, default: null, index: true },
 
     text: { type: String, required: true, trim: true, maxlength: 5000 },
     language: { type: String, default: null },

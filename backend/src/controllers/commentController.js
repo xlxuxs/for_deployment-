@@ -76,6 +76,7 @@ const createNewVersion = async (originalComment, updates) => {
       moderationReviewNeeded: false,
     },
     demographics: originalComment.demographics, // preserve demographics snapshot
+    region: originalComment.region,
     events: [
       createEvent({
         type: "version_created",
@@ -155,6 +156,7 @@ exports.postComment = async (req, res) => {
         occupation: user.occupation,
         education: user.education,
       },
+      region: user.region || null,
       events: [
         createEvent({
           type: "created",
@@ -421,25 +423,36 @@ exports.getPolicyComments = async (req, res) => {
       { $count: "total" },
     ]);
 
-    // Fetch user displayNames for all comment userIds
+    // Fetch user identities for all comment userIds
     const userIds = [
       ...new Set(comments.map((c) => c.userId).filter((id) => id)),
     ];
     let userMap = new Map();
     if (userIds.length) {
       const users = await User.find({ _id: { $in: userIds } })
-        .select("displayName")
+        .select("displayName email")
         .lean();
-      userMap = new Map(users.map((u) => [u._id.toString(), u.displayName]));
+      userMap = new Map(users.map((u) => [u._id.toString(), u]));
     }
 
     const formatted = comments.map((c) => ({
+      _id: c._id,
       id: c._id,
       text: c.text,
       user: c.userId
         ? {
             id: c.userId,
-            displayName: userMap.get(c.userId.toString()) || "Anonymous",
+            displayName:
+              userMap.get(c.userId.toString())?.displayName || "Anonymous",
+            email: userMap.get(c.userId.toString())?.email || null,
+          }
+        : null,
+      userId: c.userId
+        ? {
+            _id: c.userId,
+            displayName:
+              userMap.get(c.userId.toString())?.displayName || "Anonymous",
+            email: userMap.get(c.userId.toString())?.email || null,
           }
         : null,
       policyId: c.policyId,
@@ -491,7 +504,7 @@ exports.getCommentById = async (req, res) => {
     const { id } = req.params;
     const filter = { _id: id, ...buildVisibilityFilter(req.user) };
     const comment = await Comment.findOne(filter)
-      .populate("userId", "displayName") // only displayName
+      .populate("userId", "displayName email")
       .lean();
     if (!comment)
       return sendError(
@@ -509,6 +522,14 @@ exports.getCommentById = async (req, res) => {
         ? {
             id: comment.userId._id,
             displayName: comment.userId.displayName,
+            email: comment.userId.email || null,
+          }
+        : null,
+      userId: comment.userId
+        ? {
+            _id: comment.userId._id,
+            displayName: comment.userId.displayName,
+            email: comment.userId.email || null,
           }
         : null,
       policyId: comment.policyId,
@@ -617,7 +638,7 @@ exports.getReplies = async (req, res) => {
       ...buildVisibilityFilter(req.user),
     };
     const replies = await Comment.find(filter)
-      .populate("userId", "displayName")
+      .populate("userId", "displayName email")
       .sort(buildSortOption(sort))
       .skip((page - 1) * limit)
       .limit(Number(limit))
@@ -625,12 +646,21 @@ exports.getReplies = async (req, res) => {
 
     const total = await Comment.countDocuments(filter);
     const formatted = replies.map((r) => ({
+      _id: r._id,
       id: r._id,
       text: r.text,
       user: r.userId
         ? {
             id: r.userId._id,
             displayName: r.userId.displayName,
+            email: r.userId.email || null,
+          }
+        : null,
+      userId: r.userId
+        ? {
+            _id: r.userId._id,
+            displayName: r.userId.displayName,
+            email: r.userId.email || null,
           }
         : null,
       parentCommentId: r.parentCommentId,

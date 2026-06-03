@@ -190,6 +190,7 @@ exports.getOne = async (req, res) => {
     }
 
     const response = {
+      _id: policy._id,
       id: policy._id,
       title: policy.title,
       description: policy.description,
@@ -206,7 +207,12 @@ exports.getOne = async (req, res) => {
       relevanceFactors: policy.relevanceFactors,
       citizenAnalyticsVisibility: policy.citizenAnalyticsVisibility,
       topics: policy.topics,
-      createdBy: policy.createdBy?.email || "Unknown",
+      createdBy: policy.createdBy
+        ? {
+            _id: policy.createdBy._id,
+            email: policy.createdBy.email,
+          }
+        : null,
       createdAt: policy.createdAt,
     };
     return sendSuccess(res, response, "Policy retrieved");

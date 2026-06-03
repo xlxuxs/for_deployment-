@@ -456,6 +456,8 @@ export function PolicyAnalyticsPage() {
 
   // Heatmap helpers
   const heatmapData = heatmap?.data || [];
+  const getHeatmapRegion = (row) =>
+    row?.region || row?._id?.region || row?.regionName || "All regions";
   const getHeatmapMetric = (row) => {
     let value;
     if (analytics?.pollType === "binary") value = row.yesPercentage;
@@ -914,7 +916,7 @@ export function PolicyAnalyticsPage() {
                               <tr key={`${item.period}-${item.region}-${idx}`}>
                                 <td className="px-3 py-2">{item.period}</td>
                                 <td className="px-3 py-2">
-                                  {item.region || "All"}
+                                  {getHeatmapRegion(item)}
                                 </td>
                                 <td
                                   className="px-3 py-2"

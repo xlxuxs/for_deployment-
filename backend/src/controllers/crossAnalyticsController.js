@@ -97,9 +97,10 @@ exports.getCrossAnalytics = async (req, res) => {
 
     const totalVotes = await Vote.countDocuments(voteMatch);
 
-    // ---------- COMMENT AGGREGATION (updated for new schema) ----------
+    // ---------- COMMENT AGGREGATION ----------
     const commentMatch = {
       policyId: { $in: policyIds },
+      parentCommentId: null,
       visibility: "visible",
       $or: [
         { "sentiment.overriddenByModerator": true },
@@ -108,20 +109,91 @@ exports.getCrossAnalytics = async (req, res) => {
     };
     if (start) commentMatch.createdAt = { $gte: start };
     if (end) commentMatch.createdAt = { ...commentMatch.createdAt, $lte: end };
-    // Comments have demographics snapshot
-    if (gender) commentMatch["demographics.gender"] = gender;
-    if (ageRange) commentMatch["demographics.ageRange"] = ageRange;
-    if (occupation) commentMatch["demographics.occupation"] = occupation;
-    if (education) commentMatch["demographics.education"] = education;
 
-    const totalComments = await Comment.countDocuments(commentMatch);
+    const demographicStages = [];
+    const demographicExpr = {};
+    if (gender) {
+      demographicExpr.$and = [
+        ...(demographicExpr.$and || []),
+        {
+          $eq: [
+            { $ifNull: ["$demographics.gender", "$commenter.gender"] },
+            gender,
+          ],
+        },
+      ];
+    }
+    if (ageRange) {
+      demographicExpr.$and = [
+        ...(demographicExpr.$and || []),
+        {
+          $eq: [
+            { $ifNull: ["$demographics.ageRange", "$commenter.ageRange"] },
+            ageRange,
+          ],
+        },
+      ];
+    }
+    if (occupation) {
+      demographicExpr.$and = [
+        ...(demographicExpr.$and || []),
+        {
+          $eq: [
+            {
+              $ifNull: [
+                "$demographics.occupation",
+                "$commenter.occupation",
+              ],
+            },
+            occupation,
+          ],
+        },
+      ];
+    }
+    if (education) {
+      demographicExpr.$and = [
+        ...(demographicExpr.$and || []),
+        {
+          $eq: [
+            {
+              $ifNull: [
+                "$demographics.education",
+                "$commenter.education",
+              ],
+            },
+            education,
+          ],
+        },
+      ];
+    }
 
-    // Sentiment counts and top keywords
+    if (demographicExpr.$and?.length) {
+      demographicStages.push(
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "commenter",
+          },
+        },
+        {
+          $unwind: {
+            path: "$commenter",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        { $match: { $expr: demographicExpr } },
+      );
+    }
+
     const sentimentPipeline = [
       { $match: commentMatch },
+      ...demographicStages,
       {
         $group: {
           _id: null,
+          totalComments: { $sum: 1 },
           positive: {
             $sum: { $cond: [{ $eq: ["$sentiment.label", "positive"] }, 1, 0] },
           },
@@ -136,10 +208,12 @@ exports.getCrossAnalytics = async (req, res) => {
       },
     ];
     const sentimentResult = await Comment.aggregate(sentimentPipeline);
+    let totalComments = 0;
     let sentimentCounts = { positive: 0, negative: 0, neutral: 0 };
     let keywordFreq = {};
     if (sentimentResult.length > 0) {
       const agg = sentimentResult[0];
+      totalComments = agg.totalComments || 0;
       sentimentCounts = {
         positive: agg.positive,
         negative: agg.negative,

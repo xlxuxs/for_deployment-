@@ -126,6 +126,32 @@ export function PolicyDetailPage() {
     comment?.message ||
     "";
 
+  const normalizeComment = (comment) => {
+    const normalizedUser =
+      comment?.userId ||
+      comment?.user ||
+      (comment?.userDisplayName
+        ? { displayName: comment.userDisplayName, email: null }
+        : null);
+
+    return {
+      ...comment,
+      _id: comment?._id || comment?.id,
+      id: comment?.id || comment?._id,
+      userId: normalizedUser,
+      sentiment:
+        typeof comment?.sentiment === "string"
+          ? { label: comment.sentiment, confidence: comment.confidence ?? null }
+          : comment?.sentiment,
+    };
+  };
+
+  const getCreatorEmail = (createdBy) => {
+    if (!createdBy) return null;
+    if (typeof createdBy === "string") return createdBy;
+    return createdBy.email || null;
+  };
+
   const setTranslatedComment = (commentId, translatedText) => {
     setTranslatedComments((current) => ({
       ...current,
@@ -208,8 +234,9 @@ export function PolicyDetailPage() {
         const commentsResult = await commentApi.getPolicyComments(id, {
           limit: 1000,
         });
-        const commentsList =
+        const rawComments =
           commentsResult?.comments || commentsResult?.data || commentsResult || [];
+        const commentsList = (rawComments || []).map(normalizeComment);
         setAllComments(commentsList || []);
         setPendingComments(
           (commentsList || []).filter((c) => c.aiStatus === "pending"),
@@ -479,7 +506,7 @@ export function PolicyDetailPage() {
             <dd>{(policy.topics || []).map((topic) => t(topic)).join(", ") || t("Tourism")}</dd>
 
             <dt className="font-semibold">{t("Created By:")}</dt>
-            <dd>{policy.createdBy?.email || t("Unknown")}</dd>
+            <dd>{getCreatorEmail(policy.createdBy) || t("Unknown")}</dd>
           </dl>
         </div>
 
