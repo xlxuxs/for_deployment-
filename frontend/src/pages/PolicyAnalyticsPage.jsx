@@ -34,6 +34,7 @@ import {
   getErrorMessage,
 } from "../lib/format";
 import { useAuth } from "../auth/AuthContext";
+import PollChoices from "../components/PollChoices";
 
 const SENTIMENT_COLORS = {
   positive: "#059669",
@@ -685,16 +686,7 @@ export function PolicyAnalyticsPage() {
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
                   Choices
                 </p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {policyChoices.map((choice) => (
-                    <span
-                      key={choice}
-                      className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-700"
-                    >
-                      {choice}
-                    </span>
-                  ))}
-                </div>
+                <PollChoices policy={policy} />
               </div>
             </div>
           </section>

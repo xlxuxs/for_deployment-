@@ -34,6 +34,7 @@ import { formatDate, getErrorMessage, toIsoFromDateInput } from "../lib/format";
 import { showToast } from "../lib/toast";
 import { ETHIOPIAN_REGIONS } from "../constants/regions";
 import { useI18n } from "../i18n/I18nProvider";
+import PollChoices from "../components/PollChoices";
 
 const TRANSLATION_LANGUAGES = [
   { code: "en", label: "English" },
@@ -152,46 +153,7 @@ export function PolicyDetailPage() {
     return createdBy.email || null;
   };
 
-  const renderPollChoices = () => {
-    if (!policy) return null;
-
-    if (policy.pollType === "binary") {
-      return "Yes, No";
-    }
-
-    if (policy.pollType === "rating") {
-      return "1 star, 2 stars, 3 stars, 4 stars, 5 stars";
-    }
-
-    if (policy.pollType === "likert") {
-      return (policy.likertLabels || [])
-        .map((label, index) => `${index + 1}. ${label}`)
-        .join(", ");
-    }
-
-    if (policy.pollType === "multipleChoice") {
-      const optionList = (policy.pollOptions || []).map((option) => option.text);
-      const selectionNote =
-        policy.maxSelections > 1
-          ? ` Select up to ${policy.maxSelections}.`
-          : "";
-      return `${optionList.join(", ")}${selectionNote}`.trim();
-    }
-
-    if (policy.pollType === "approval") {
-      return (policy.pollOptions || []).map((option) => option.text).join(", ");
-    }
-
-    if (policy.pollType === "rankedChoice") {
-      const optionList = (policy.pollOptions || []).map((option) => option.text);
-      const rankNote = policy.rankedChoiceMaxRank
-        ? ` Rank up to ${policy.rankedChoiceMaxRank}.`
-        : "";
-      return `${optionList.join(", ")}${rankNote}`.trim();
-    }
-
-    return "No choices configured";
-  };
+  // Rendered via shared component below
 
   const setTranslatedComment = (commentId, translatedText) => {
     setTranslatedComments((current) => ({
@@ -601,7 +563,7 @@ export function PolicyDetailPage() {
             <dd>{t(policy.pollType || "multipleChoice")}</dd>
 
             <dt className="font-semibold">{t("Choices:")}</dt>
-            <dd>{renderPollChoices()}</dd>
+            <dd><PollChoices policy={policy} /></dd>
 
             <dt className="font-semibold">{t("Topics:")}</dt>
             <dd>{(policy.topics || []).map((topic) => t(topic)).join(", ") || t("Tourism")}</dd>
@@ -795,7 +757,7 @@ export function PolicyDetailPage() {
               <dt className="font-semibold">Poll Type:</dt>
               <dd>{policy.pollType}</dd>
               <dt className="font-semibold">Choices:</dt>
-              <dd>{renderPollChoices()}</dd>
+              <dd><PollChoices policy={policy} /></dd>
               <dt className="font-semibold">Topics:</dt>
               <dd>{policy.topics?.join(", ") || "None"}</dd>
               <dt className="font-semibold">Sentiment Counts:</dt>
