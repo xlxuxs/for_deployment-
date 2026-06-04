@@ -3,9 +3,24 @@ const axios = require("axios");
 /**
  * Verifies a Google reCAPTCHA v2 token.
  * @param {string} token - The captcha token from frontend.
+ * @param {object} [req] - The Express request object to check for mobile clients.
  * @returns {Promise<boolean>} - True if verified successfully, false otherwise.
  */
-const verifyCaptcha = async (token) => {
+const verifyCaptcha = async (token, req) => {
+  if (req) {
+    const userAgent = req.headers["user-agent"] || "";
+    const clientType = req.headers["x-client-type"] || "";
+    if (
+      clientType === "mobile" ||
+      userAgent.includes("Expo") ||
+      userAgent.includes("okhttp") ||
+      userAgent.includes("Dart") ||
+      userAgent.includes("CitizenVoiceMobile")
+    ) {
+      return true; // Skip captcha verification for mobile clients
+    }
+  }
+
   if (!token) return false;
   try {
     const response = await axios.post(
