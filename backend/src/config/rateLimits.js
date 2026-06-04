@@ -1,4 +1,5 @@
 const createRateLimiter = require("../middleware/rateLimiter");
+const { normalizePhone } = require("../utils/helpers");
 
 const intEnv = (name, fallback) => {
   const value = parseInt(process.env[name], 10);
@@ -131,7 +132,21 @@ const limiters = {
     windowMs: 60 * 1000,
     max: intEnv("RATE_LIMIT_SMS_RECEIVE_MAX", 10),
     keyPrefix: "rl:sms:receive",
-    keyGenerator: (req) => req.ip,
+    keyGenerator: (req) => {
+      const phone =
+        req.body?.phone ||
+        req.body?.from ||
+        req.body?.From ||
+        req.body?.msisdn ||
+        req.body?.sender ||
+        req.body?.Sender;
+
+      if (typeof phone === "string" && phone.trim()) {
+        return `phone:${normalizePhone(phone)}`;
+      }
+
+      return `ip:${req.ip}`;
+    },
   }),
 };
 
