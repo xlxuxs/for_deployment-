@@ -193,7 +193,7 @@ const getPolicyChoiceSummary = (policy) => {
 
 export function PolicyAnalyticsPage() {
   const { id } = useParams();
-  const { user, role } = useAuth();
+  const { user, auth, role } = useAuth();
   const [policy, setPolicy] = useState(null);
   const [analytics, setAnalytics] = useState(null);
   const [comments, setComments] = useState([]);
@@ -212,6 +212,7 @@ export function PolicyAnalyticsPage() {
   const [error, setError] = useState("");
   const [hasExportPermission, setHasExportPermission] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const currentUserId = user?._id || user?.id || auth?.userId || null;
 
   // Lazy loaded data
   const [timeseries, setTimeseries] = useState(null);
@@ -262,8 +263,8 @@ export function PolicyAnalyticsPage() {
         if (!active) return;
         setPolicy(policyResult);
         setIsOwner(
-          policyResult.createdBy?._id === user?.id ||
-            policyResult.createdBy === user?.id,
+          policyResult.createdBy?._id === currentUserId ||
+            policyResult.createdBy === currentUserId,
         );
         if (allowedAnalyticsStatuses.includes(policyResult.status)) {
           const params = {
@@ -285,7 +286,7 @@ export function PolicyAnalyticsPage() {
     return () => {
       active = false;
     };
-  }, [id, filters.startDate, filters.endDate, user?.id]);
+  }, [id, filters.startDate, filters.endDate, currentUserId]);
 
   // Set initial timeseries metric based on poll type
   useEffect(() => {
