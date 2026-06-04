@@ -3,6 +3,7 @@ import {
   BarChart3,
   CalendarClock,
   Copy,
+  Download,
   Edit,
   History,
   Pause,
@@ -16,6 +17,7 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { policyApi } from "../api/policies";
+import { analyticsApi } from "../api/analytics";
 import { EmptyState } from "../components/EmptyState";
 import { ErrorAlert } from "../components/ErrorAlert";
 import { showToast } from "../lib/toast";
@@ -142,6 +144,29 @@ export function PlannerPoliciesPage() {
     );
   };
 
+  const exportPolicyCsv = async (policy) => {
+    setActionLoading(`export-${policy.id}`);
+    setError("");
+    setNotice("");
+    try {
+      const blob = await analyticsApi.exportCsv(policy.id);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `policy-${policy.policyCode || policy.id}-analytics.csv`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      setNotice("CSV exported.");
+      try { showToast("success", "CSV exported."); } catch (e) {}
+    } catch (err) {
+      setError(getErrorMessage(err, "Failed to export CSV"));
+    } finally {
+      setActionLoading("");
+    }
+  };
+
   return (
     <div>
       <PageHeader
@@ -215,13 +240,22 @@ export function PlannerPoliciesPage() {
                       <td className="min-w-[23rem] px-4 py-4">
                         <div className="flex flex-wrap gap-2">
                           {analyticsAllowed ? (
-                            <Link
-                              className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
-                              to={`/policies/${policy.id}/analytics`}
-                            >
-                              <BarChart3 className="h-4 w-4" />
-                              Analytics
-                            </Link>
+                            <>
+                              <Link
+                                className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                                to={`/policies/${policy.id}/analytics`}
+                              >
+                                <BarChart3 className="h-4 w-4" />
+                                Analytics
+                              </Link>
+                              <Button
+                                disabled={busy}
+                                icon={Download}
+                                onClick={() => exportPolicyCsv(policy)}
+                              >
+                                Export CSV
+                              </Button>
+                            </>
                           ) : null}
                           {policy.status === "draft" ? (
                             <Link
