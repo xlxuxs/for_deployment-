@@ -13,7 +13,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import {
   CartesianGrid,
   Line,
@@ -408,8 +408,9 @@ export function DashboardPage() {
   }, [adminStats, trends]);
 
   if (role === "comment_moderator") {
-    return <CommentModerationPage />;
+    return <Navigate to="/comments/pending" replace />;
   }
+
 
   if (loading) return <LoadingState label="Loading your dashboard" />;
 

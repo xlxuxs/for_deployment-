@@ -577,8 +577,9 @@ export function CommentModerationPage() {
         ? "No reported comments."
         : "No pending appeals.";
 
+
   return (
-    <div>
+    <div className="comment-moderation-page">
       <PageHeader
         title="Comment Moderation"
         description="Review low‑confidence AI comments, reported comments, and pending appeals."

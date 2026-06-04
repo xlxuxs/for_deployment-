@@ -48,9 +48,9 @@ const adminLinks = [
 ];
 
 const moderatorLinks = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/comments/pending", label: "Comment Moderation", icon: MessageSquare },
 ];
+
 
 const DASHBOARD_THEME_KEY = "civic_dashboard_theme";
 
@@ -286,29 +286,29 @@ export function AppShell() {
 
           <div className="flex items-center gap-3">
             <LocaleSwitcher compact />
+            <button
+              type="button"
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+                isDark
+                  ? "border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
+              aria-pressed={isDark}
+              title={isDark ? t("Switch to light mode") : t("Switch to dark mode")}
+            >
+              {isDark ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+              <span className="hidden sm:inline">
+                {isDark ? t("Light mode") : t("Dark mode")}
+              </span>
+            </button>
+
             {role !== "comment_moderator" && (
               <>
-                <button
-                  type="button"
-                  onClick={() => setTheme(isDark ? "light" : "dark")}
-                  className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
-                    isDark
-                      ? "border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
-                      : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                  }`}
-                  aria-pressed={isDark}
-                  title={isDark ? t("Switch to light mode") : t("Switch to dark mode")}
-                >
-                  {isDark ? (
-                    <Sun className="h-4 w-4" />
-                  ) : (
-                    <Moon className="h-4 w-4" />
-                  )}
-                  <span className="hidden sm:inline">
-                    {isDark ? t("Light mode") : t("Dark mode")}
-                  </span>
-                </button>
-
                 {/* Messages */}
                 <button
                   onClick={() => navigate("/messages")}

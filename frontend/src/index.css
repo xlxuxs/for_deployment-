@@ -125,10 +125,26 @@ button:disabled {
   background-color: rgba(15, 23, 42, 0.72);
 }
 
+.dashboard-shell[data-dashboard-theme="dark"] .bg-emerald-100,
+.dashboard-shell[data-dashboard-theme="dark"] .bg-blue-100,
+.dashboard-shell[data-dashboard-theme="dark"] .bg-amber-100,
+.dashboard-shell[data-dashboard-theme="dark"] .bg-rose-100,
+.dashboard-shell[data-dashboard-theme="dark"] .bg-teal-100 {
+  background-color: rgba(30, 41, 59, 0.92);
+}
+
 .dashboard-shell[data-dashboard-theme="dark"] .border-slate-100,
 .dashboard-shell[data-dashboard-theme="dark"] .border-slate-200,
 .dashboard-shell[data-dashboard-theme="dark"] .border-slate-300 {
   border-color: #334155;
+}
+
+.dashboard-shell[data-dashboard-theme="dark"] .border-emerald-200,
+.dashboard-shell[data-dashboard-theme="dark"] .border-blue-200,
+.dashboard-shell[data-dashboard-theme="dark"] .border-amber-200,
+.dashboard-shell[data-dashboard-theme="dark"] .border-rose-200,
+.dashboard-shell[data-dashboard-theme="dark"] .border-teal-200 {
+  border-color: rgba(71, 85, 105, 0.95);
 }
 
 .dashboard-shell[data-dashboard-theme="dark"] .border-slate-700 {
@@ -165,6 +181,22 @@ button:disabled {
   color: #cbd5e1;
 }
 
+.dashboard-shell[data-dashboard-theme="dark"] .text-emerald-700,
+.dashboard-shell[data-dashboard-theme="dark"] .text-blue-700,
+.dashboard-shell[data-dashboard-theme="dark"] .text-blue-800,
+.dashboard-shell[data-dashboard-theme="dark"] .text-amber-700,
+.dashboard-shell[data-dashboard-theme="dark"] .text-rose-700,
+.dashboard-shell[data-dashboard-theme="dark"] .text-teal-700 {
+  color: #e2e8f0;
+}
+
+.dashboard-shell[data-dashboard-theme="dark"] .text-emerald-600,
+.dashboard-shell[data-dashboard-theme="dark"] .text-blue-600,
+.dashboard-shell[data-dashboard-theme="dark"] .text-amber-600,
+.dashboard-shell[data-dashboard-theme="dark"] .text-rose-600 {
+  color: #cbd5e1;
+}
+
 .dashboard-shell[data-dashboard-theme="dark"] .hover\:bg-slate-50:hover,
 .dashboard-shell[data-dashboard-theme="dark"] .hover\:bg-white:hover {
   background-color: #1e293b;
@@ -177,6 +209,11 @@ button:disabled {
 
 .dashboard-shell[data-dashboard-theme="dark"] .hover\:bg-slate-100:hover {
   background-color: #334155;
+}
+
+.dashboard-shell[data-dashboard-theme="dark"] .hover\:bg-emerald-100:hover,
+.dashboard-shell[data-dashboard-theme="dark"] .hover\:bg-rose-100:hover {
+  background-color: rgba(51, 65, 85, 0.95);
 }
 
 .dashboard-shell[data-dashboard-theme="dark"] .hover\:bg-rose-50:hover {
@@ -580,6 +617,7 @@ button:disabled {
 .dashboard-shell[data-dashboard-theme="dark"] .messages-page .hover\:bg-white:hover {
   background-color: #1e293b;
 }
+
 
 .recharts-wrapper * {
   outline: none;
