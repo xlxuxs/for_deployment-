@@ -361,7 +361,7 @@ exports.login = async (req, res) => {
   try {
     const { email, password, captchaToken } = req.body;
 
-    const isValidCaptcha = await verifyCaptcha(captchaToken);
+    const isValidCaptcha = await verifyCaptcha(captchaToken, req);
     if (!isValidCaptcha) {
       return res.status(400).json({ message: "CAPTCHA verification failed" });
     }

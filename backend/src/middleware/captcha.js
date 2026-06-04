@@ -24,6 +24,18 @@ const verifyCaptcha = async (token) => {
 };
 
 const captchaMiddleware = async (req, res, next) => {
+  const userAgent = req.headers["user-agent"] || "";
+  const clientType = req.headers["x-client-type"] || "";
+  if (
+    clientType === "mobile" ||
+    userAgent.includes("Expo") ||
+    userAgent.includes("okhttp") ||
+    userAgent.includes("Dart") ||
+    userAgent.includes("CitizenVoiceMobile")
+  ) {
+    return next();
+  }
+
   const token = req.body?.captchaToken || req.query?.captchaToken || req.headers["x-captcha-token"];
   const expectedAction = req.body?.captchaAction || req.query?.captchaAction || null;
 
