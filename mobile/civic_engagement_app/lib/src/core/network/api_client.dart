@@ -21,41 +21,79 @@ class ApiClient {
   final List<String> _baseUrls;
 
   static const _timeout = Duration(seconds: 20);
+  static const _translationTimeout = Duration(minutes: 5);
 
   Future<ApiResult> get(
     String path, {
     Map<String, dynamic>? query,
     bool authenticated = true,
+    Duration? timeout,
   }) {
-    return _send('GET', path, query: query, authenticated: authenticated);
+    return _send(
+      'GET',
+      path,
+      query: query,
+      authenticated: authenticated,
+      timeout: timeout,
+    );
   }
 
   Future<ApiResult> post(
     String path, {
     Map<String, dynamic>? body,
     bool authenticated = true,
+    Duration? timeout,
   }) {
-    return _send('POST', path, body: body, authenticated: authenticated);
+    return _send(
+      'POST',
+      path,
+      body: body,
+      authenticated: authenticated,
+      timeout: timeout,
+    );
   }
 
   Future<ApiResult> put(
     String path, {
     Map<String, dynamic>? body,
     bool authenticated = true,
+    Duration? timeout,
   }) {
-    return _send('PUT', path, body: body, authenticated: authenticated);
+    return _send(
+      'PUT',
+      path,
+      body: body,
+      authenticated: authenticated,
+      timeout: timeout,
+    );
   }
 
   Future<ApiResult> patch(
     String path, {
     Map<String, dynamic>? body,
     bool authenticated = true,
+    Duration? timeout,
   }) {
-    return _send('PATCH', path, body: body, authenticated: authenticated);
+    return _send(
+      'PATCH',
+      path,
+      body: body,
+      authenticated: authenticated,
+      timeout: timeout,
+    );
   }
 
-  Future<ApiResult> delete(String path, {bool authenticated = true}) {
-    return _send('DELETE', path, authenticated: authenticated);
+  Future<ApiResult> delete(
+    String path, {
+    bool authenticated = true,
+    Duration? timeout,
+  }) {
+    return _send(
+      'DELETE',
+      path,
+      authenticated: authenticated,
+      timeout: timeout,
+    );
   }
 
   Future<ApiResult> _send(
@@ -64,6 +102,7 @@ class ApiClient {
     Map<String, dynamic>? query,
     Map<String, dynamic>? body,
     bool authenticated = true,
+    Duration? timeout,
   }) async {
     ApiException? lastConnectionError;
 
@@ -76,6 +115,7 @@ class ApiClient {
           query: query,
           body: body,
           authenticated: authenticated,
+          timeout: timeout,
         );
       } on ApiException catch (error) {
         if (error.statusCode != null) {
@@ -98,6 +138,7 @@ class ApiClient {
     Map<String, dynamic>? query,
     Map<String, dynamic>? body,
     bool authenticated = true,
+    Duration? timeout,
   }) async {
     final uri = _uri(baseUrl, path, query);
     final headers = <String, String>{
@@ -119,7 +160,7 @@ class ApiClient {
         uri,
         headers,
         encodedBody,
-      ).timeout(_timeout);
+      ).timeout(timeout ?? _timeout);
       return _handleResponse(response);
     } on TimeoutException {
       throw ApiException(message: 'The server took too long to respond.');
@@ -159,6 +200,8 @@ class ApiClient {
         throw ApiException(message: 'Unsupported request method: $method');
     }
   }
+
+  Duration get translationTimeout => _translationTimeout;
 
   ApiResult _handleResponse(http.Response response) {
     // Add debug logging

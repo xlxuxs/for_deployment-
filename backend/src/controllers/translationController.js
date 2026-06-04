@@ -11,10 +11,14 @@ const TRANSLATE_SPACE_URL = process.env.TRANSLATE_SPACE_URL;
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY;
 const AI_SERVICE_URL =
   process.env.AI_SERVICE_URL || "https://ai-sevice.onrender.com";
-const TRANSLATION_TIMEOUT_MS = Number.parseInt(
+const MIN_TRANSLATION_TIMEOUT_MS = 300000;
+const configuredTranslationTimeoutMs = Number.parseInt(
   process.env.TRANSLATION_TIMEOUT_MS || "",
   10,
-) || 90000;
+);
+const TRANSLATION_TIMEOUT_MS = Number.isFinite(configuredTranslationTimeoutMs)
+  ? Math.max(configuredTranslationTimeoutMs, MIN_TRANSLATION_TIMEOUT_MS)
+  : MIN_TRANSLATION_TIMEOUT_MS;
 const TRANSLATION_RETRY_ATTEMPTS = Number.parseInt(
   process.env.TRANSLATION_RETRY_ATTEMPTS || "",
   10,

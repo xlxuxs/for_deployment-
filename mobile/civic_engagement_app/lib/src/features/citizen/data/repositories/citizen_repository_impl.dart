@@ -324,6 +324,7 @@ class CitizenRepositoryImpl implements CitizenRepository {
           if (targetLang != null && targetLang.trim().isNotEmpty)
             'targetLang': targetLang.trim(),
         },
+        timeout: _apiClient.translationTimeout,
       );
       final data = response.data as Map<String, dynamic>? ?? {};
       return data['translatedText']?.toString() ??

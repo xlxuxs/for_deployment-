@@ -1,6 +1,6 @@
 import { apiClient } from "./client";
 
-const TRANSLATION_TIMEOUT_MS = 240000;
+const TRANSLATION_TIMEOUT_MS = 300000;
 
 /**
  * Translate text via backend.
