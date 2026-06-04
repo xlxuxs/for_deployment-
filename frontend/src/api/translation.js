@@ -1,5 +1,7 @@
 import { apiClient } from "./client";
 
+const TRANSLATION_TIMEOUT_MS = 240000;
+
 /**
  * Translate text via backend.
  * - `text` (string) required
@@ -9,7 +11,9 @@ import { apiClient } from "./client";
 export async function translateText({ text, targetLang = "en", sourceLang = null }) {
   const body = { text, targetLang };
   if (sourceLang) body.sourceLang = sourceLang;
-  const resp = await apiClient.post("/translate", body);
+  const resp = await apiClient.post("/translate", body, {
+    timeout: TRANSLATION_TIMEOUT_MS,
+  });
   return resp.translatedText || resp;
 }
 

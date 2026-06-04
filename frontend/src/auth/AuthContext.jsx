@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
   const location = useLocation();
   const [auth, setAuth] = useState(() => readStoredAuth());
   const [user, setUser] = useState(null);
-  const publicPaths = ["/", "/login", "/forgot-password", "/reset-password"];
+  const publicPaths = ["/", "/public", "/login", "/forgot-password", "/reset-password"];
   const isPublicRoute =
     publicPaths.includes(location.pathname) ||
     location.pathname.startsWith("/public/");

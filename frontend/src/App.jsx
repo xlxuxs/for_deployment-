@@ -78,7 +78,7 @@ function NotFoundPage() {
 export default function App() {
   const location = useLocation();
 
-  if (location.pathname === "/") {
+  if (location.pathname === "/" || location.pathname === "/public") {
     return (
       <ToastsProvider>
         <PublicLandingPage />
@@ -89,6 +89,7 @@ export default function App() {
   return (
     <ToastsProvider>
       <Routes>
+      <Route path="/public" element={<PublicLandingPage />} />
       <Route path="/public/policies/:id/analytics" element={<PublicPolicyAnalyticsPage />} />
       <Route path="/sms-studio" element={<SmsTestingPage />} />
       <Route path="/login" element={<LoginPage />} />
