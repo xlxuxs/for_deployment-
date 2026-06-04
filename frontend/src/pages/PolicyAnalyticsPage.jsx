@@ -251,6 +251,8 @@ export function PolicyAnalyticsPage() {
   const allowedAnalyticsStatuses = ["active", "paused", "closed", "archived"];
   const canViewAnalytics =
     policy && allowedAnalyticsStatuses.includes(policy.status);
+  const canAttemptExport =
+    canViewAnalytics && (role === "planner" || role === "admin");
 
   // Fetch policy and summary
   useEffect(() => {
@@ -467,7 +469,7 @@ export function PolicyAnalyticsPage() {
   };
 
   const downloadCsv = async () => {
-    if (!hasExportPermission) return;
+    if (!canAttemptExport) return;
     setExporting(true);
     setError("");
     try {
@@ -651,7 +653,7 @@ export function PolicyAnalyticsPage() {
               <ArrowLeft className="h-4 w-4" />
               Policies
             </Link>
-            {canViewAnalytics && hasExportPermission && (
+            {canAttemptExport && (
               <button
                 type="button"
                 disabled={exporting}
