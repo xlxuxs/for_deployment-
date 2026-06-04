@@ -854,29 +854,6 @@ export function PolicyFormPage({ mode }) {
             </div>
           </fieldset>
 
-          {/* Citizen Analytics Visibility */}
-          <fieldset className="rounded-lg border border-slate-200 p-4">
-            <legend className="px-1 text-sm font-bold text-slate-800">
-              Citizen Analytics Visibility
-            </legend>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              {Object.keys(emptyValues.citizenAnalyticsVisibility).map(
-                (key) => (
-                  <label
-                    key={key}
-                    className="flex items-center gap-2 text-sm font-semibold text-slate-700"
-                  >
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 accent-teal-700"
-                      {...register(`citizenAnalyticsVisibility.${key}`)}
-                    />
-                    {key}
-                  </label>
-                ),
-              )}
-            </div>
-          </fieldset>
         </fieldset>
 
         <div className="mt-6 flex flex-wrap gap-2">

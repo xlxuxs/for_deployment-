@@ -80,12 +80,12 @@ const ALLOWED_PROOF_FILE_TYPES = new Set([
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ]);
 
-const APP_DOWNLOAD_URL = import.meta.env.VITE_MOBILE_APP_URL || "https://drive.google.com/file/d/1IoDB_fscGSJHmlS8jR05GFoxA8joJuh7/view?usp=drive_link";
+const APP_DOWNLOAD_URL = import.meta.env.VITE_MOBILE_APP_URL || "https://drive.google.com/file/d/1csnxf8q-wc3FGWjFeLpxTPkNf-hz_wM_/view";
 
 const navigationItems = [
   { label: "Overview", href: "#overview" },
   { label: "Planner access", href: "#planner-request" },
-  { label: "Download", href: "https://drive.google.com/file/d/1IoDB_fscGSJHmlS8jR05GFoxA8joJuh7/view?usp=drive_link" },
+  { label: "Download", href: APP_DOWNLOAD_URL },
 ];
 
 function countWords(value) {
