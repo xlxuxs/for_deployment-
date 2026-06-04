@@ -426,9 +426,7 @@ export function PublicLandingPage() {
         <div className="relative z-10">
           <div className="mx-auto max-w-7xl px-6 py-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="grid h-12 w-12 place-items-center rounded-3xl bg-white/20 text-white">
-                <Globe2 className="h-6 w-6" />
-              </div>
+              <img src="/logo-icon-white.png" alt="Civic Voice Logo" className="h-12 w-12 object-contain" />
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest text-white/90">{t("Civic Platform")}</p>
               </div>

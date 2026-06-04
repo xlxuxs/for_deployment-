@@ -194,9 +194,7 @@ export function AppShell() {
       >
         <div className="flex h-16 items-center justify-between border-b border-slate-200 px-5">
           <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-lg bg-teal-700 text-sm font-black text-white">
-              CP
-            </span>
+            <img src="/logo-icon.png" alt="Civic Voice" className="h-10 w-10 object-contain" />
             <div>
               <p className="m-0 text-sm font-bold text-slate-950">
                 {t("Civic Platform")}

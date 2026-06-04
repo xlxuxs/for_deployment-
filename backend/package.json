@@ -7,6 +7,7 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "seed:moderation-languages": "node scripts/seedModerationLanguageComments.js",
+    "seed:production-moderation": "node scripts/seedProductionModerationData.js",
     "seed:massive": "node scripts/seedMassiveDataset.js",
     "seed:public-analytics": "node scripts/seedPublicAnalyticsPolicies.js",
     "seed:test-notifications": "node scripts/seedTestNotifications.js",

@@ -115,7 +115,11 @@ export function ForgotPasswordPage() {
             }`}
           >
             <div className="mb-8">
-              <span className="grid h-12 w-12 place-items-center rounded-lg bg-teal-700 text-sm font-black text-white">CP</span>
+              <img
+                src={isDark ? "/logo-icon-white.png" : "/logo-icon.png"}
+                alt="Civic Voice Logo"
+                className="h-12 w-12 object-contain"
+              />
               <h2 className={`mt-5 text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-950'}`}>Email sent</h2>
               <p className={`mt-1 text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>Check your inbox for a password reset link.</p>
             </div>
@@ -187,7 +191,11 @@ export function ForgotPasswordPage() {
       <section className="mx-auto flex w-full max-w-md items-center lg:max-w-none lg:pl-10">
         <div className={`w-full rounded-lg border p-6 shadow-soft sm:p-8 ${isDark ? 'border-white/10 bg-slate-950/85' : 'border-slate-200 bg-white'}`}>
           <div className="mb-8">
-            <span className="grid h-12 w-12 place-items-center rounded-lg bg-teal-700 text-sm font-black text-white">CP</span>
+            <img
+              src={isDark ? "/logo-icon-white.png" : "/logo-icon.png"}
+              alt="Civic Voice Logo"
+              className="h-12 w-12 object-contain"
+            />
             <h2 className={`mt-5 text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-950'}`}>Reset password</h2>
             <p className={`mt-1 text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>We'll email you a reset link.</p>
           </div>

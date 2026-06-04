@@ -189,9 +189,12 @@ export function LoginPage() {
                   <p className="text-2xl font-semibold leading-10 text-white">
                     {t("Track policy performance, engagement metrics, and civic participation at a glance.")}
                   </p>
-                  <div className="mt-6">
-                    <p className="text-sm font-semibold text-white">Civic Platform</p>
-                    <p className="mt-1 text-sm text-teal-50/80">{t("Secure sign in")}</p>
+                  <div className="mt-6 flex items-center gap-3">
+                    <img src="/logo-icon-white.png" alt="Civic Voice Logo" className="h-10 w-10 object-contain" />
+                    <div>
+                      <p className="text-sm font-semibold text-white">Civic Voice</p>
+                      <p className="mt-1 text-sm text-teal-50/80">{t("Secure sign in")}</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -207,9 +210,11 @@ export function LoginPage() {
           >
             <div className="w-full max-w-md">
               <div className="inline-flex items-center gap-3">
-                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-teal-700 text-sm font-black text-white shadow-lg shadow-teal-900/20">
-                  CP
-                </span>
+                <img
+                  src={isDark ? "/logo-icon-white.png" : "/logo-icon.png"}
+                  alt="Civic Voice Logo"
+                  className="h-11 w-11 object-contain"
+                />
                 <div>
                   <p className={`text-lg font-bold ${isDark ? "text-white" : "text-slate-950"}`}>{t("Civic Engagement Platform")}</p>
                 </div>
