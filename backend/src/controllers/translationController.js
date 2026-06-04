@@ -22,7 +22,8 @@ const TRANSLATION_TIMEOUT_MS = Number.isFinite(configuredTranslationTimeoutMs)
 const TRANSLATION_RETRY_ATTEMPTS = Number.parseInt(
   process.env.TRANSLATION_RETRY_ATTEMPTS || "",
   10,
-) || 3;
+) || 1;
+const inFlightTranslations = new Map();
 
 const getTranslateEndpoint = (baseUrl) => {
   if (!baseUrl) return null;
@@ -43,15 +44,28 @@ const normalizeLang = (lang) => String(lang || "").trim().toLowerCase();
 const shouldRetryTranslationError = (err) => {
   const status = err.response?.status;
   return (
-    err.code === "ECONNABORTED" ||
-    err.code === "ETIMEDOUT" ||
     err.code === "ECONNRESET" ||
-    !status ||
-    status >= 500
+    status === 502 ||
+    status === 503 ||
+    status === 504
   );
 };
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const extractTranslatedText = (data) => {
+  if (!data) return "";
+  if (typeof data === "string") return data;
+  if (typeof data.translated_text === "string") return data.translated_text;
+  if (typeof data.translatedText === "string") return data.translatedText;
+  if (typeof data.translation_text === "string") return data.translation_text;
+  if (typeof data.translation === "string") return data.translation;
+  if (Array.isArray(data) && typeof data[0] === "string") return data[0];
+  if (Array.isArray(data) && typeof data[0]?.translation_text === "string") {
+    return data[0].translation_text;
+  }
+  return "";
+};
 
 const requestTranslationWithRetries = async (
   translateEndpoint,
@@ -167,12 +181,29 @@ exports.translate = async (req, res) => {
 
     const translateEndpoint = getTranslateEndpoint(TRANSLATE_SPACE_URL);
 
-    const response = await requestTranslationWithRetries(
-      translateEndpoint,
-      { text, source_lang: sourceLang, target_lang: targetLang },
-    );
-    const translated = response.data.translated_text;
-    await redisClient.setEx(cacheKey, 86400, translated);
+    const runTranslation = async () => {
+      const response = await requestTranslationWithRetries(
+        translateEndpoint,
+        { text, source_lang: sourceLang, target_lang: targetLang },
+      );
+      const translated = extractTranslatedText(response.data);
+      if (!translated) {
+        throw new Error("Translation provider returned no translated text");
+      }
+      await redisClient.setEx(cacheKey, 86400, translated);
+      return translated;
+    };
+
+    const existingRequest = inFlightTranslations.get(cacheKey);
+    const translated = existingRequest
+      ? await existingRequest
+      : await (() => {
+          const request = runTranslation().finally(() => {
+            inFlightTranslations.delete(cacheKey);
+          });
+          inFlightTranslations.set(cacheKey, request);
+          return request;
+        })();
 
     return sendSuccess(
       res,
