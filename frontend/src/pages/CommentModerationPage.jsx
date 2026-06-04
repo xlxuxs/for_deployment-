@@ -3,13 +3,11 @@ import {
   CheckCircle,
   AlertCircle,
   Trash2,
-  History,
   Eye,
   PenSquare,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { adminApi } from "../api/admin";
-import { commentApi } from "../api/comments";
 import { ErrorAlert } from "../components/ErrorAlert";
 import { LoadingState } from "../components/LoadingState";
 import { Modal } from "../components/Modal";
@@ -50,11 +48,6 @@ export function CommentModerationPage() {
     comment: null,
     sentiment: "neutral",
     keywords: "",
-  });
-
-  const [historyModal, setHistoryModal] = useState({
-    open: false,
-    versions: [],
   });
 
   const [appealModal, setAppealModal] = useState({
@@ -245,22 +238,6 @@ export function CommentModerationPage() {
     setSelectedComment(comment);
     setActionType("reject");
     setModalOpen(true);
-  };
-
-  const viewHistory = async (commentId) => {
-    setActionLoading((prev) => ({ ...prev, [`history-${commentId}`]: true }));
-    try {
-      const versions = await commentApi.getVersions(commentId);
-      setHistoryModal({ open: true, versions: versions || [] });
-    } catch (err) {
-      setError(getErrorMessage(err, "Failed to load comment history"));
-    } finally {
-      setActionLoading((prev) => {
-        const newState = { ...prev };
-        delete newState[`history-${commentId}`];
-        return newState;
-      });
-    }
   };
 
   const viewReports = async (commentId) => {
@@ -544,18 +521,6 @@ export function CommentModerationPage() {
               </button>
             </>
           )}
-
-          {/* History button – only for appeals */}
-          {isAppeal && (
-            <button
-              onClick={() => viewHistory(comment._id)}
-              disabled={actionLoading[`history-${comment._id}`]}
-              className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
-            >
-              <History className="h-3.5 w-3.5" />
-              History
-            </button>
-          )}
         </div>
       </div>
     );
@@ -834,46 +799,6 @@ export function CommentModerationPage() {
               </button>
             </div>
           </div>
-        </Modal>
-      )}
-
-      {/* History modal (versions) */}
-      {historyModal.open && (
-        <Modal
-          title="Comment Version History"
-          onClose={() => setHistoryModal({ open: false, versions: [] })}
-        >
-          {historyModal.versions.length === 0 ? (
-            <p className="text-sm text-slate-600">
-              No previous versions found.
-            </p>
-          ) : (
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {historyModal.versions.map((version, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-lg border border-slate-200 p-3"
-                >
-                  <p className="text-xs text-slate-500 mb-1">
-                    Version {version.versionNumber} • Created{" "}
-                    {formatDate(version.createdAt)}
-                  </p>
-                  <p className="text-sm text-slate-900">{version.text}</p>
-                  {version.sentiment?.label && (
-                    <p className="text-xs text-slate-600 mt-1">
-                      Sentiment: {version.sentiment.label} (
-                      {(version.sentiment.confidence * 100).toFixed(0)}%)
-                    </p>
-                  )}
-                  {version.keywords?.length > 0 && (
-                    <p className="text-xs text-slate-600">
-                      Keywords: {version.keywords.join(", ")}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
         </Modal>
       )}
 

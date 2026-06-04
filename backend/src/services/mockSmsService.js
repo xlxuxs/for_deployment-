@@ -289,6 +289,13 @@ function getPolicyTypeLabel(locale, pollType) {
   return t(locale, pollType);
 }
 
+function shortenSmsLine(value, maxLength = 40) {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, Math.max(0, maxLength - 3)).trimEnd()}...`;
+}
+
 function formatChoiceLines(locale, policy) {
   switch (policy.pollType) {
     case "binary":
@@ -577,16 +584,20 @@ async function createPolicyPageState(subscription, phoneHash, page = 0) {
 
 function formatPolicyList(locale, policies, page, totalPages) {
   const lines = [
-    `1. ${t(locale, "policyListTitle")}`,
-    `2. ${t(locale, "page")} ${page + 1}/${totalPages}`,
+    t(locale, "policyListTitle"),
+    `${t(locale, "page")} ${page + 1}/${totalPages}`,
     "",
     ...policies.map((policy, index) => {
-      const regions = (policy.targetRegions || []).join(", ") || t(locale, "allRegions");
-      return `${index + 1}. ${policy.title}\n   ${t(locale, "policyType")}: ${getPolicyTypeLabel(locale, policy.pollType)}\n   ${t(locale, "regions")}: ${regions}`;
+      const regions = shortenSmsLine(
+        (policy.targetRegions || []).join(", ") || t(locale, "allRegions"),
+        22,
+      );
+      const title = shortenSmsLine(policy.title, 38);
+      return `${index + 1}. ${title}\n   ${getPolicyTypeLabel(locale, policy.pollType)} | ${regions}`;
     }),
     "",
-    `1. ${t(locale, "replyWithNumber")}`,
-    `2. ${t(locale, "morePolicies")}`,
+    t(locale, "replyWithNumber"),
+    t(locale, "morePolicies"),
   ];
 
   return lines.join("\n");
